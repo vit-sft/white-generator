@@ -1,8 +1,10 @@
 import os
 import aiofiles
 from aiohttp import ClientSession
+import asyncio
 from core.config import CSS_CONTENT, JS_CONTENT, render_html
 import pathlib
+import hashlib
 
 APP_DIR = pathlib.Path(__file__).parent.parent
 DIST_DIR = str(APP_DIR.parent / "dist")
@@ -12,20 +14,18 @@ CSS_DIR = os.path.join(STATIC_DIR, "css")
 JS_DIR = os.path.join(STATIC_DIR, "js")
 
 
-async def download_images(urls, dst_folder):
-    os.makedirs(dst_folder, exist_ok=True)
-    dst_paths = []
+async def download_image(url):
+    
     async with ClientSession() as session:
-        for i, url in enumerate(urls, start=1):
-            ext = os.path.splitext(url)[1] or ".webp"
-            filename = f"{i}.webp"
-            dst = os.path.join(dst_folder, filename)
-            async with session.get(url) as resp:
-                if resp.status == 200:
-                    async with aiofiles.open(dst, "wb") as f:
-                        await f.write(await resp.read())
-                    dst_paths.append(dst)
-    return dst_paths
+        ext = os.path.splitext(url)[1] or ".webp"
+        url_hash = hashlib.md5(url.encode()).hexdigest()
+        filename = f"{url_hash}{ext}"
+        dst = os.path.join(IMG_DIR, filename)
+        async with session.get(url) as resp:
+            if resp.status == 200:
+                async with aiofiles.open(dst, "wb") as f:
+                    await f.write(await resp.read())
+    return dst
 
 async def build_site(data):
     # Ensure directories exist
@@ -34,7 +34,7 @@ async def build_site(data):
     os.makedirs(IMG_DIR, exist_ok=True)
     os.makedirs(CSS_DIR, exist_ok=True)
     os.makedirs(JS_DIR, exist_ok=True)
-
+    
     # Remove old images in IMG_DIR
     for fname in os.listdir(IMG_DIR):
         fpath = os.path.join(IMG_DIR, fname)
@@ -42,7 +42,9 @@ async def build_site(data):
             os.remove(fpath)
 
     # Download screenshots to /static/img
-    screenshot_files = await download_images(data['screenshot_urls'], IMG_DIR)
+    tasks = [download_image(url) for url in data['screenshot_urls']]
+    
+    screenshot_files = await asyncio.gather(*tasks)
 
     # Download icon to /static/img/icon.webp
     icon_path = os.path.join(IMG_DIR, "icon.webp")
