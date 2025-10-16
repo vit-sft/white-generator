@@ -10,38 +10,24 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 TEMPLATES_DIR = os.path.join(BASE_DIR, "templates")
 
 async def read_file(path: str) -> str:
-    """Function for reading a file by it's path. Returns str with content
-
-    Args:
-        path (str): path to a file   
-
-    Returns:
-        str: File contents
+    """
+    Function for reading a file by it's path. Returns str with content
     """
     async with aiofiles.open(path, "r", encoding="utf-8") as f:
         return await f.read()
 
-async def write_file(path: str, content: str, **format_kwargs):
-    """Function for writing a file by it's path and content with kwargs for formatting file.
-
-    Args:
-        path (str): Path to a file
-        content (str): Futute contents
-        Kwargs: substitutions for a file
+async def write_file(path: str, content: str):
+    """
+    Function for writing a file by it's path and content with kwargs for formatting file.
     """
     async with aiofiles.open(path, "w", encoding="utf-8") as f:
-        if format_kwargs:
-            content = content.format(**format_kwargs)
+        # if format_kwargs:
+        #     content = content.format(**format_kwargs)
         await f.write(content)
     
 async def load_files(template_dir: str) -> list[str]:
-    """Function for readings files in async from random template's folder
-
-    Args:
-        template_dir (str): Path to a chosen template
-
-    Returns:
-        list[str]: Paths for page files
+    """
+    Function for readings files in async from random template's folder
     """
     index_path = os.path.join(template_dir, "index.html")
     css_path = os.path.join(template_dir, "style.css")
@@ -56,13 +42,8 @@ async def load_files(template_dir: str) -> list[str]:
     return index_content, css_content, js_content
 
 async def download_image(url: str) -> str:
-    """Downloads an image from url into img directory and hashes it's name 
-
-    Args:
-        url (str): url to image
-
-    Returns:
-        str: path to image
+    """
+    Downloads an image from url into img directory and hashes it's name 
     """
     async with ClientSession() as session:
         ext = os.path.splitext(url)[1] or ".webp"
@@ -75,11 +56,9 @@ async def download_image(url: str) -> str:
                     await f.write(await resp.read())
     return dst
 
-async def build_site(data: dict):
-    """Builds a sife from a given data into a DIST_DIR folder
-
-    Args:
-        data (dict): data given by a url parser with title, description etc. 
+async def build_site(data: dict, styles: dict):
+    """
+    Builds a sife from a given data into a DIST_DIR folder
     """
     # Ensure directories exist
     os.makedirs(DIST_DIR, exist_ok=True)
@@ -117,20 +96,50 @@ async def build_site(data: dict):
     
     # Build HTML
     screenshots_html = "\n".join(
-        f'<img src="static/img/{os.path.basename(p)}" alt="Screenshot {i+1}">'
+        f'<div><img src="static/img/{os.path.basename(p)}" alt="Screenshot {i+1}"></div>'
         for i, p in enumerate(screenshot_files)
     )
+    components_path = os.path.join(template_dir, "components")
+
+    component_files = os.listdir(components_path)
+    random.shuffle(component_files)
+    components = [await read_file(os.path.join(components_path, component_file)) for component_file in component_files]
 
     index_path = (os.path.join(DIST_DIR, "index.html"))
     css_path = (os.path.join(CSS_DIR, "style.css"))
     js_path = (os.path.join(JS_DIR, "main.js"))
 
-    title = data.get("title", "")
-    description = data.get("description", "")
-    icon_url = data.get("icon_url", "")
+    title = data['title']
+    description = data['description']
+    logo_path = f"static/img/{os.path.basename(icon_path)}"
+    app_url = data['app_url']
+    
+    font_url = styles['font_url']
+    root_element = styles['root_element']
 
+    # Join all components into one HTML string
+    components_html = ''.join(components)
+    index_content = index_content.format(
+        font_url=font_url,
+        title=title,
+        app_url=app_url,
+        logo_path=logo_path,
+        components_html=components_html
+    )
+    index_content = index_content.format(
+        description_html=description,
+        screenshots_html=screenshots_html,
+        font_url=font_url,
+        title=title,
+        app_url=app_url,
+        logo_path=logo_path,
+        components_html=components_html
+    )
+    
+    css_content = root_element + '\n' + css_content
+    
     await asyncio.gather(
-        write_file(index_path, index_content, title=title, description=description, icon_url=icon_url, screenshots_html=screenshots_html, icon_path=f"static/img/{os.path.basename(icon_path)}"),
+        write_file(index_path, index_content),
         write_file(css_path, css_content),
         write_file(js_path, js_content)
     )

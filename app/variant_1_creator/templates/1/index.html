@@ -1,31 +1,35 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{title}</title>
+    <link href="{font_url}" rel="stylesheet">
     <link rel="stylesheet" href="static/css/style.css">
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <img src="{icon_path}" alt="App Icon">
-            <h1>{title}</h1>
-        </div>
-        <p>{description}</p>
-        <div class="slider-container">
-            <div class="slider-track" id="sliderTrack">
-                {screenshots_html}
+        <header class="header">
+            <div class="header-content">
+                <img src="{logo_path}" alt="{title} Logo" class="logo">
+                <h1>{title}</h1>
+                <nav class="nav">
+                    <a href="#about">About</a>
+                    <a href="#screenshots">Screenshots</a>
+                </nav>
             </div>
-            <button class="slider-button prev" onclick="moveSlide(-1)">❮</button>
-            <button class="slider-button next" onclick="moveSlide(1)">❯</button>
-        </div>
-        <div class="slider-container">
-            <div class="slider-track" id="sliderTrack">
-                {screenshots_html}
+        </header>
+        <main class="main-content">
+            {components_html}
+            <div style="display: flex; justify-content: center;">
+                <a href="{app_url}" class="download_button">Download now</a>
             </div>
-        <ul class="dots"></ul>
-        </div>
+        </main>
+        <footer class="footer">
+            <p>{title} &copy; 2025</p>
+        </footer>
     </div>
-    <script src="static/js/main.js"></script>
+
+<script src="static/js/main.js"></script>
 </body>
 </html>
