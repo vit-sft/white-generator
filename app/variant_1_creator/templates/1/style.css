@@ -1,0 +1,96 @@
+body {
+    margin: 0;
+    font-family: 'Segoe UI', sans-serif;
+    background-color: #1e1e1e;
+    color: #fff;
+}
+.container {
+    padding: 20px;
+    max-width: 1000px;
+    margin: auto;
+}
+.header {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+.header img {
+    width: 80px;
+    height: 80px;
+    border-radius: 16px;
+}
+h1 {
+    margin: 0;
+}
+.description {
+    margin: 20px 0;
+    font-size: 1.1em;
+    line-height: 1.6;
+}
+.screenshots {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+}
+.screenshots img {
+    width: 100%;
+    border-radius: 10px;
+    transition: transform 0.2s ease;
+}
+.screenshots img:hover {
+    transform: scale(1.02);
+}
+.slider-container {
+    position: relative;
+    width: 100%;
+    max-width: 600px;
+    margin: 40px auto;
+    overflow: hidden;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.2);
+}
+.slider-track {
+    display: flex;
+    transition: transform 0.4s ease-in-out;
+}
+.slider-track img {
+    width: 100%;
+    flex-shrink: 0;
+}
+.slider-button {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: rgba(0,0,0,0.5);
+    color: white;
+    border: none;
+    padding: 10px;
+    cursor: pointer;
+    z-index: 10;
+    font-size: 20px;
+    border-radius: 50%;
+}
+.slider-button.prev {
+    left: 10px;
+}
+.slider-button.next {
+    right: 10px;
+}
+.dots {
+  display: flex;
+  justify-content: center;
+  list-style: none;
+  padding: 0;
+  margin: 10px 0 0;
+  gap: 8px;
+}
+.dots li {
+  width: 12px;
+  height: 12px;
+  background: #bbb;
+  border-radius: 50%;
+  cursor: pointer;
+}
+.dots li.active {
+  background: #333;
+}

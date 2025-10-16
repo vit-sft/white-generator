@@ -18,13 +18,14 @@ async def build_app_site(url: str):
         html = await fetch_html(session, url)
         parser = get_parser(html)
         soup = BeautifulSoup(html, 'html.parser')
-        data = parser(soup)
-        print(data)
+        data = parser(soup, url)
+        # print(data)
 
         await build_site(data)
         print(f"Site generated for: {data['title']}")
 
 if __name__ == "__main__":
-    app_url = "https://apps.apple.com/ua/app/chatgpt/id6448311069"
+    # app_url = "https://apps.apple.com/ua/app/chatgpt/id6448311069"
+    app_url = 'https://play.google.com/store/apps/details?id=com.miHoYo.GenshinImpact&pcampaignid=merch_published_cluster_promotion_battlestar_featured_games'
     # app_url = "https://play.google.com/store/apps/details?id=ua.slando"
     asyncio.run(build_app_site(app_url))

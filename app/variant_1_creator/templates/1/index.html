@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>{title}</title>
+    <link rel="stylesheet" href="static/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <img src="{icon_path}" alt="App Icon">
+            <h1>{title}</h1>
+        </div>
+        <p>{description}</p>
+        <div class="slider-container">
+            <div class="slider-track" id="sliderTrack">
+                {screenshots_html}
+            </div>
+            <button class="slider-button prev" onclick="moveSlide(-1)">❮</button>
+            <button class="slider-button next" onclick="moveSlide(1)">❯</button>
+        </div>
+        <div class="slider-container">
+            <div class="slider-track" id="sliderTrack">
+                {screenshots_html}
+            </div>
+        <ul class="dots"></ul>
+        </div>
+    </div>
+    <script src="static/js/main.js"></script>
+</body>
+</html>
