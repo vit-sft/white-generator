@@ -1,4 +1,8 @@
 import random
+import os
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+FONTS_DIR = os.path.join(BASE_DIR, "presets/fonts")
 
 def get_random_style():
     """
@@ -30,19 +34,9 @@ def get_random_style():
         }
     }
     palette_name = random.choice(list(palettes.keys()))
+    chosen_font = random.choice(os.listdir(FONTS_DIR))
+    font_dir = os.path.join(FONTS_DIR, chosen_font)
     
-    # list of Google Fonts
-    fonts = {
-        "Poppins": "'Poppins', sans-serif",
-        "Roboto": "'Roboto', sans-serif",
-        "Montserrat": "'Montserrat', sans-serif",
-        "Lato": "'Lato', sans-serif",
-        "Open Sans": "'Open Sans', sans-serif",
-    }
-    font_name = random.choice(list(fonts.keys()))
-    font_family = fonts[font_name]
-    font_url = f"https://fonts.googleapis.com/css2?family={font_name.replace(' ', '+')}:wght@400;700&display=swap"
-
     colors = palettes[palette_name]
     primary = colors['primary'] 
     secondary = colors['secondary']
@@ -51,7 +45,7 @@ def get_random_style():
     text_secondary = colors['text_secondary']
     
     root_element = f""":root {{
-        --font-family: {font_family};
+        --font-family: "{chosen_font}", sans-serif;
         --background: {background};
         --text-primary: {text_primary};
         --text-secondary: {text_secondary};
@@ -60,6 +54,40 @@ def get_random_style():
     }}"""
 
     return {
-        "font_url": font_url,
+        "font": [chosen_font, font_dir],
         "root_element": root_element
     }
+
+def get_font_face(chosen_font, font_dir):
+    
+    font_files = [f for f in os.listdir(font_dir)]
+
+    if not font_files:
+        raise FileNotFoundError(f"No .ttf font files found in {font_dir}")
+
+    css_blocks = []
+
+    for filename in font_files:
+        font_family = chosen_font  
+
+        weight = 400
+        style = "normal"
+
+        lower_name = filename.lower()
+        if "bold" in lower_name:
+            weight = 700
+        if "italic" in lower_name:
+            style = "italic"
+        
+        css = f"""
+        @font-face {{
+        font-family: '{font_family}';
+        src: url('../fonts/{chosen_font}/{filename}') format('truetype');
+        font-weight: {weight};
+        font-style: {style};
+        }}
+        """
+        css_blocks.append(css.strip())
+
+    full_css = "\n\n".join(css_blocks)
+    return full_css

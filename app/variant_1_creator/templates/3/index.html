@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{title}</title>
+    <link rel="stylesheet" href="static/css/style.css">
+</head>
+<body>
+
+    <div class="header-container">
+        <header class="nav-bar">
+            <a href="{app_url}" class="nav-title">{title}</a>
+            <nav class="nav-menu">
+                <a href="#about" class="nav-title">About</a>
+                <a href="#screenshots" class="nav-title">Screenshots</a>
+            </nav>
+        </header>
+
+        <div class="hero-section">
+            <h1 class="hero-title">{title}</h1>
+            <p class="hero-subtitle">Next-level experience</p>
+            <a href="{app_url}" class="hero-button">Download</a>
+        </div>
+    </div>
+
+    <main class="main-container">
+        {components_html}
+    </main>
+
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-logo-block">
+                <img class="footer-logo" src="{logo_path}" alt="{title} Logo" class="logo">
+                <h3 class="footer-title">{title}</h3>
+            </div>
+            <div class="footer-text">
+                <span>All rights reserved. Copyright © 2025</span>
+            </div>
+        </div>
+    </footer>
+
+</body>
+</html>
