@@ -12,7 +12,9 @@ def get_parser(url: str):
     return None
 
 def parse_google_play(soup: BeautifulSoup, app_url) -> dict:
-    
+    """
+    Parser for google play links
+    """
     # Title
     title_tag = soup.find('span', class_='AfwdI')
     title = None
@@ -21,10 +23,16 @@ def parse_google_play(soup: BeautifulSoup, app_url) -> dict:
         # Filter out tags, keeping only the text parts
         title_parts = [part for part in title_tag.contents if isinstance(part, str)]
         title = ''.join(title_parts).strip()
+        title = title.replace('{', '{{').replace('}', '}}')
+
 
     # Description
     desc_tag = soup.find('div', class_='bARER', attrs={'data-g-id': 'description'})
-    description = desc_tag.get_text(separator='<br>').strip() if desc_tag else None
+    if desc_tag:
+        description = desc_tag.get_text(separator='<br>').strip()
+        description = description.replace('{', '{{').replace('}', '}}')
+    else:
+        description = None
 
     # Icon URL
     icon_img = soup.select_one('img.T75of.cN0oRe.fFmL2e')
@@ -43,7 +51,9 @@ def parse_google_play(soup: BeautifulSoup, app_url) -> dict:
     }
 
 def parse_app_store(soup: BeautifulSoup, app_url) -> dict:
-    
+    """
+    Parser for app store links
+    """
     # Title
     title_tag = soup.select_one('h1.product-header__title')
     title = None
@@ -52,12 +62,16 @@ def parse_app_store(soup: BeautifulSoup, app_url) -> dict:
         # Filter out tags, keeping only the text parts
         title_parts = [part for part in title_tag.contents if isinstance(part, str)]
         title = ''.join(title_parts).strip()
+        title = title.replace('{', '{{').replace('}', '}}')
 
     # Description
     description = None
     
     desc_tag = soup.select_one('div.section__description p')
-    description = desc_tag.get_text(separator='<br>').strip() if desc_tag else None
+    
+    if desc_tag:
+        description = desc_tag.get_text(separator='<br>').strip()
+        description = description.replace('{', '{{').replace('}', '}}')
 
     # Icon
     picture = soup.select_one("picture.we-artwork--ios-app-icon")

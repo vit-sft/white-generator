@@ -2,15 +2,16 @@ import os
 import aiofiles
 from aiohttp import ClientSession
 import asyncio
-from core.config import DIST_DIR, STATIC_DIR, IMG_DIR, CSS_DIR, JS_DIR, FONTS_DIR
+from core.config import DIST_DIR, STATIC_DIR, IMG_DIR, CSS_DIR, FONTS_DIR
 import hashlib
 import random
 from .styles import get_random_style, get_font_face
-from .utils import copy_all_fonts
+from .utils import copy_all_files
 import shutil
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 TEMPLATES_DIR = os.path.join(BASE_DIR, "templates")
+PRESETS_IMG_DIR = os.path.join(BASE_DIR, "presets/images")
 
 async def read_file(path: str) -> str:
     """
@@ -32,24 +33,25 @@ async def load_files(template_dir: str) -> list[str]:
     """
     index_path = os.path.join(template_dir, "index.html")
     css_path = os.path.join(template_dir, "style.css")
-    js_path = os.path.join(template_dir, "main.js")
-
-    index_content, css_content, js_content = await asyncio.gather(
+    index_content, css_content = await asyncio.gather(
         read_file(index_path),
-        read_file(css_path),
-        read_file(js_path)
+        read_file(css_path)
     )
 
-    return index_content, css_content, js_content
+    return index_content, css_content
 
-async def download_image(url: str) -> str:
+async def download_image(url: str, filename=None) -> str:
     """
     Downloads an image from url into img directory and hashes it's name 
     """
+    if not url:
+        return None
+    
     async with ClientSession() as session:
         ext = os.path.splitext(url)[1] or ".webp"
         url_hash = hashlib.md5(url.encode()).hexdigest()
-        filename = f"{url_hash}{ext}"
+        if not filename:
+            filename = f"{url_hash}{ext}"
         dst = os.path.join(IMG_DIR, filename)
         async with session.get(url) as resp:
             if resp.status == 200:
@@ -57,14 +59,14 @@ async def download_image(url: str) -> str:
                     await f.write(await resp.read())
     return dst
 
-async def build_site(data: dict):
+async def build_site(data: dict) -> str:
     """
     Builds a sife from a given data into a DIST_DIR folder
     """
     if os.path.isdir(DIST_DIR):
         shutil.rmtree(DIST_DIR)
         
-    dirs_to_create = [DIST_DIR, STATIC_DIR, IMG_DIR, CSS_DIR, JS_DIR, FONTS_DIR]
+    dirs_to_create = [DIST_DIR, STATIC_DIR, IMG_DIR, CSS_DIR, FONTS_DIR]
 
     for directory in dirs_to_create:
         os.makedirs(directory, exist_ok=True)
@@ -73,24 +75,18 @@ async def build_site(data: dict):
     # chosen_template = random.choice(os.listdir(TEMPLATES_DIR))
     # template_dir = os.path.join(TEMPLATES_DIR, chosen_template)
 
-    template_dir = 'C:\\Users\\u1-1824\\Desktop\\Projects\\app\\variant_1_creator\\templates\\3'
-    # Download screenshots to /static/img
-    tasks = [download_image(url) for url in data['screenshot_urls']]
+    template_dir = 'C:\\Users\\u1-1824\\Desktop\\Projects\\app\\variant_1_creator\\templates\\1'
     
-    screenshot_files = await asyncio.gather(*tasks)
+    # Download screenshots and icon to /static/img
+    screenshot_tasks = [download_image(url) for url in data['screenshot_urls']]
+    icon_task = download_image(data['icon_url'], filename="icon.webp")
+    
+    results = await asyncio.gather(*screenshot_tasks, icon_task)
+    
+    screenshot_files = results[:-1]
+    icon_path = results[-1]
 
-    # Download icon to /static/img/icon.webp
-    icon_path = os.path.join(IMG_DIR, "icon.webp")
-    async with ClientSession() as session:
-        async with session.get(data['icon_url']) as resp:
-            if resp.status == 200:
-                async with aiofiles.open(icon_path, "wb") as f:
-                    await f.write(await resp.read())
-            else:
-                icon_path = data['icon_url']
-
-    # Read HTML, CSS, JS
-    index_content, css_content, js_content = await load_files(template_dir)
+    index_content, css_content = await load_files(template_dir)
     
     # Build HTML
     screenshots_html = "\n".join(
@@ -106,11 +102,14 @@ async def build_site(data: dict):
     
     title = data['title']
     description = data['description']
-    logo_path = f"static/img/{os.path.basename(icon_path)}"
+    logo_path = ""
+    
+    if icon_path:
+        logo_path = f"static/img/{os.path.basename(icon_path)}"
+        
     app_url = data['app_url']
     
     styles = get_random_style()
-    # font_url = styles['font_url']
     root_element = styles['root_element']
     chosen_font, font_dir = styles['font']
     
@@ -118,7 +117,6 @@ async def build_site(data: dict):
     
     index_path = (os.path.join(DIST_DIR, "index.html"))
     css_path = (os.path.join(CSS_DIR, "style.css"))
-    js_path = (os.path.join(JS_DIR, "main.js"))
     fonts_path = (os.path.join(FONTS_DIR, chosen_font))
     
     # Join all components into one HTML string
@@ -143,6 +141,8 @@ async def build_site(data: dict):
     await asyncio.gather(
         write_file(index_path, index_content),
         write_file(css_path, css_content),
-        write_file(js_path, js_content),
-        copy_all_fonts(font_dir, fonts_path)
+        copy_all_files(font_dir, fonts_path),
+        copy_all_files(PRESETS_IMG_DIR, IMG_DIR)
     )
+    
+    return os.path.abspath(DIST_DIR)

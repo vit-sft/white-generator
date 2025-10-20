@@ -157,12 +157,13 @@ body {
 
 }
 .gallery-container div img {
+    width: 100%;
     aspect-ratio: 16 / 9;
     object-fit: contain;
 }
 
 .footer {
-    background-color: #2c3e50; 
+    background: linear-gradient(190deg, var(--primary), var(--text-secondary));
     color: white; 
     padding: 2rem 1rem; 
 }
