@@ -17,3 +17,8 @@ async def copy_all_files(file_dir, dest_dir):
             tasks.append(copy_file_async(src, dst))
 
     await asyncio.gather(*tasks)
+
+def remove_dir(path):
+    """Removes directory if it exists"""
+    if os.path.isdir(path):
+        shutil.rmtree(path)

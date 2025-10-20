@@ -2,12 +2,11 @@ import os
 import aiofiles
 from aiohttp import ClientSession
 import asyncio
-from core.config import DIST_DIR, STATIC_DIR, IMG_DIR, CSS_DIR, FONTS_DIR
+from app.core.config import DIST_DIR, STATIC_DIR, IMG_DIR, CSS_DIR, FONTS_DIR
 import hashlib
 import random
 from .styles import get_random_style, get_font_face
-from .utils import copy_all_files
-import shutil
+from app.utils import copy_all_files, remove_dir
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 TEMPLATES_DIR = os.path.join(BASE_DIR, "templates")
@@ -63,8 +62,8 @@ async def build_site(data: dict) -> str:
     """
     Builds a sife from a given data into a DIST_DIR folder
     """
-    if os.path.isdir(DIST_DIR):
-        shutil.rmtree(DIST_DIR)
+    #Removing an old directory
+    remove_dir(DIST_DIR)
         
     dirs_to_create = [DIST_DIR, STATIC_DIR, IMG_DIR, CSS_DIR, FONTS_DIR]
 
