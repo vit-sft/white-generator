@@ -11,6 +11,9 @@ body {
     color: var(--text-primary);
 }
 
+html {
+    scroll-behavior: smooth;
+}
 
 .header-container {
     background: linear-gradient(135deg, var(--primary), var(--text-secondary));

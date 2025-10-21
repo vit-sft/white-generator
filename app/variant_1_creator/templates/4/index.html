@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{title}</title>
+    <link rel="stylesheet" href="static/css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-container">
+            <div class="header-logo-block">
+                <img class="header-logo" src="{logo_path}" alt="{title} Logo" class="logo">
+                <a class="navbar-title" href="{app_url}">{title}</a>
+            </div>
+            <div class="navbar-menu">
+                <ul class="navbar-menu-list">
+                    <li class="navbar-menu-list__element">
+                        <a href="#about">About</a>
+                    </li>
+                    <li class="navbar-menu-list__element">
+                        <a href="#screenshots">Screenshots</a>
+                    </li>
+                    <a class="navbar-btn" href="{app_url}">Download</a>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <section class="bg-home" id="home">
+        <div class="home-center">
+            <div class="home-container">
+                <div class="home-title">
+                    <img class="footer-logo" src="{logo_path}" alt="{title} Logo" class="logo">
+                    <h1 class="title">
+                        {title}
+                    </h1>
+                    <a class="title-btn" href="{app_url}">Download</a>
+                </div>
+                <div class="home-visual-block">
+                    <div class="phone-wrap">
+                        <img class="phone-bg" src="static/img/phone-bg.png" alt="">
+                        <img class="phone-content" src="static/img/{preview_img}" alt="">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    {components_html}
+    <section id="download" class="download-container">
+        <div>
+            <div><a href="{app_url}"><img class="download-icon" src="static/img/download.png" alt=""></div></a>
+            <div><h2>Download</h2></div>
+            <div><a href="{app_url}"><img class="store-badge" src="static/img/{badge}" alt=""></div></a>
+        </div>
+    </section>
+</body>
+</html>

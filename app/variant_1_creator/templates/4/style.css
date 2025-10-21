@@ -1,0 +1,358 @@
+html {
+    scroll-behavior: smooth;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    text-decoration: none;
+}
+
+body {
+    font-family: var(--font-family);
+    line-height: 1.6;
+    background-color: rgb(240, 242, 245);
+    color: var(--text-primary);
+}
+
+.navbar {
+    background-color: var(--bg-navbar);
+    padding: 1rem 0;
+    width: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 999;
+    transition: all 0.4s ease-in-out;
+    backdrop-filter: blur(6px);
+}
+
+.navbar-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 40px;
+}
+
+.navbar-title {
+    color: var(--text-primary);
+    font-size: 1.5rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    text-decoration: none;
+}
+
+.navbar-menu-list {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.navbar-menu-list__element a {
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease-in-out;
+}
+
+.navbar-menu-list__element a:hover {
+    color: var(--text-primary);
+}
+
+.navbar-btn {
+    background-color: var(--primary);
+    padding: 10px 20px;
+    border-radius: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease-in-out;
+}
+
+a.navbar-btn:hover {
+    color: var(--secondary);
+    background-color: var(--text-primary);
+    transform: translateY(-2px);
+}
+.bg-home {
+    background: linear-gradient(180deg, var(--secondary), var(--text-secondary));
+    height: 100dvh;
+    padding: 8rem 0 8rem 0;
+}
+
+.home-center {
+    max-width: 1140px;
+    width: 100%;
+    margin-right: auto;
+    margin-left: auto;
+    height: 100%;
+}
+
+.home-container {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    height: 100%;
+}
+
+.home-title {
+    flex: 0 1 50%;
+    max-width: 50%;
+    position: relative;
+    width: 100%;
+    padding: 0 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    align-items: center;
+}
+
+.home-visual-block {
+    flex: 0 1 50%;
+    max-width: 50%;
+    position: relative;
+    width: 100%;
+    padding: 0 1rem;
+    height: 100%;
+}
+
+.phone-wrap {
+    height: 100%;
+    display: block;
+}
+
+.phone-bg, .phone-content {
+    height: 100%;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    aspect-ratio: 9/18.5;
+}
+.phone-bg {
+    z-index: 100;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    aspect-ratio: 9 / 18.5;
+}
+.phone-content {
+    height: 98%;
+    z-index: 99;
+    object-fit: contain;
+    padding: 4px;
+    border-radius: 13%;
+    background-color: #292929;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    aspect-ratio: 9 / 18.5;
+}
+
+.title-btn {
+    background-color: var(--text-primary);
+    padding: 10px 20px;
+    border-radius: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease-in-out;
+    align-self: center;
+    color: var(--secondary);
+}
+
+.title-btn:hover {
+    color: var(--primary);
+    background-color: var(--text-primary);
+    transform: translateY(-2px);
+}
+
+.about-container {
+    max-width: 900px;
+    margin: 6rem auto;
+    text-align: center;
+    padding: 2rem;
+    overflow-wrap: break-word;
+}
+
+.about-container h2 {
+    font-size: 2.2rem;
+    margin-bottom: 1.5rem;
+    color: var(--text-primary);
+}
+
+.about-container p {
+    font-size: 1rem;
+    line-height: 1.8;
+    color: var(--text-secondary);
+    margin-bottom: 2rem;
+}
+
+.about-container a {
+    display: inline-block;
+    background-color: var(--primary);
+    color: white;
+    padding: 12px 30px;
+    border-radius: 25px;
+    text-transform: uppercase;
+    font-weight: 600;
+    transition: all 0.3s ease-in-out;
+}
+
+.about-container a:hover {
+    background-color: var(--text-primary);
+}
+
+.screenshots-container {
+    background-color: var(--secondary);
+    padding: 4rem 2rem;
+    text-align: center;
+}
+
+.screenshots-container h2 {
+    font-size: 2.2rem;
+    margin-bottom: 2rem;
+}
+
+.carousel {
+    overflow: hidden;
+    position: relative;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.carousel__track {
+    display: flex;
+    gap: 1rem;
+    animation: scroll 25s linear infinite;
+}
+
+.carousel__track img {
+    height: 400px;
+    width: auto;
+    border-radius: 10px;
+    transition: transform 0.3s ease;
+}
+
+@keyframes scroll {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+}
+
+.download-container {
+    background-color: var(--primary);
+    color: white;
+    padding: 2rem 2rem;
+    text-align: center;
+}
+
+.download-container div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+.download-container h2 {
+    font-size: 2rem;
+}
+
+.download-icon {
+    width: 60px;
+    max-width: 80%;
+}
+
+.store-badge {
+    width: 360px;
+    max-width: 80%;
+}
+
+footer {
+    background-color: var(--text-primary);
+    color: white;
+    text-align: center;
+    padding: 1rem 0;
+    font-size: 0.9rem;
+}
+
+.footer-logo {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.header-logo {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+.header-logo-block {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+@media (max-width: 992px) {
+    .home-container {
+        flex-direction: column;
+        text-align: center;
+        align-items: center;
+    }
+    .title-btn {
+        align-self: anchor-center;
+    }
+
+    .home-title {
+        flex: 1 1 100%;
+    }
+
+    .home-title h1 {
+        font-size: 2.2rem;
+    }
+
+    .home-visual-block {
+        flex: 1 1 100%;
+        justify-content: center;
+    }
+
+    .phone-wrap {
+        max-width: 220px;
+    }
+}
+
+@media (max-width: 768px) {
+    .bg-home {
+        padding: 12rem 0 6rem 0;;
+    }
+    .navbar-container {
+        flex-direction: column;
+    }
+    .home-title, .navbar-btn {
+        display: none;
+    }
+    .navbar-menu-list {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .carousel__track img {
+        height: 300px;
+    }
+
+    .download-icon {
+        width: 60px;
+    }
+
+    .store-badge {
+        width: 360px;
+    }
+    
+}
