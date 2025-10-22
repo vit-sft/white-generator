@@ -78,7 +78,7 @@ async def build_site(data: dict) -> str:
     chosen_template = random.choice(os.listdir(TEMPLATES_DIR))
     template_dir = os.path.join(TEMPLATES_DIR, chosen_template)
 
-    template_dir = 'C:\\Users\\u1-1824\\Desktop\\Projects\\app\\variant_1_creator\\templates\\4'
+    # template_dir = 'C:\\Users\\u1-1824\\Desktop\\Projects\\app\\variant_1_creator\\templates\\4'
     
     # Download screenshots and icon to /static/img
     screenshot_tasks = [download_image(url) for url in data['screenshot_urls']]
