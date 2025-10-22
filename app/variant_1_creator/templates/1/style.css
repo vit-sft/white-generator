@@ -175,6 +175,15 @@ h2 {
     font-size: 0.9em;
 }
 
+.title-block {
+    display: flex;
+    flex-direction: column;
+}
+.purchases-title {
+    margin: 0;
+    font-size: 10px;
+    color: gray;
+}
 @media (max-width: 1024px) {
     .header-content {
         flex-direction: column;

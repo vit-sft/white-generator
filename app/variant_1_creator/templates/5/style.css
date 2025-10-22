@@ -11,6 +11,11 @@
     from { opacity: 0; transform: translateY(30px); }
     to { opacity: 1; transform: translateY(0); }
 }
+* {
+    margin: 0;
+    padding: 0;
+    text-decoration: none;
+}
 
 html {
     scroll-behavior: smooth;
@@ -70,22 +75,42 @@ body {
 
 .hero-content {
     animation: slideIn 1s ease-out;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .logo {
     width: 150px;
     height: 150px;
     border-radius: var(--border-radius);
-    margin-bottom: 20px;
 }
 
 h1 {
-    font-size: 5rem;
+    font-size: clamp(3rem, 5vw, 5rem);
     margin: 0;
+    line-height: 1.2;
 }
 
 .content-section {
     padding: var(--section-padding) 20px;
+}
+
+.download-btn {
+    margin-top: 20px;
+    background-color: var(--text-secondary);
+    padding: 1rem 1.7rem;
+    border-radius: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease-in-out;
+    color: white;
+}
+
+a.download-btn:hover {
+    background-color: var(--text-primary);
+    transform: translateY(-2px);
 }
 
 .container {
@@ -97,6 +122,11 @@ h1 {
 .content-section.dark {
     background-color: var(--text-primary);
     color: var(--secondary);
+}
+.purchases-title {
+    margin: 0;
+    font-size: 10px;
+    color: rgb(87, 87, 87);
 }
 
 .dark h2 {

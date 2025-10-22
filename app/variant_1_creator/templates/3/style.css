@@ -106,10 +106,15 @@ html {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 1rem; 
     border-radius: 16px; 
     box-shadow: 4px 4px 20px rgb(49 49 49 / 16%); 
     margin: auto;
+}
+
+.purchases-title {
+    margin: 0;
+    font-size: 10px;
+    color: gray;
 }
 
 .image-wrapper {

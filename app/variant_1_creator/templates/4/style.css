@@ -46,6 +46,10 @@ body {
     text-decoration: none;
 }
 
+#home .purchases-title{
+    display: none;
+}
+
 .navbar-menu-list {
     display: flex;
     align-items: center;
@@ -67,18 +71,22 @@ body {
 }
 
 .navbar-btn {
-    background-color: var(--primary);
+    background-color: var(--text-primary);
     padding: 10px 20px;
     border-radius: 12px;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     transition: all 0.3s ease-in-out;
+    color: var(--secondary);
 }
 
 a.navbar-btn:hover {
-    color: var(--secondary);
-    background-color: var(--text-primary);
+    background-color: var(--text-secondary);
+    transform: translateY(-2px);
+}
+.home-title__download:hover {
+    background-color: var(--text-secondary);
     transform: translateY(-2px);
 }
 .bg-home {
@@ -93,6 +101,7 @@ a.navbar-btn:hover {
     margin-right: auto;
     margin-left: auto;
     height: 100%;
+    text-align: -webkit-center;
 }
 
 .home-container {
@@ -112,6 +121,25 @@ a.navbar-btn:hover {
     flex-direction: column;
     gap: 1rem;
     align-items: center;
+}
+
+.home-title__purchases {
+    display: block;
+    font-size: 10px;
+    color: rgb(87, 87, 87);
+}
+
+.home-title__download {
+    background-color: var(--text-primary);
+    padding: 10px 20px;
+    border-radius: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.3s 
+ease-in-out;
+    align-self: center;
+    color: var(--secondary);
 }
 
 .home-visual-block {
@@ -248,7 +276,7 @@ a.navbar-btn:hover {
 .download-container {
     background-color: var(--primary);
     color: white;
-    padding: 2rem 2rem;
+    padding: 1rem 2rem;
     text-align: center;
 }
 
@@ -260,7 +288,7 @@ a.navbar-btn:hover {
 }
 
 .download-title h2 {
-    font-size: 2rem;
+    font-size: 1.5rem;
 }
 
 .download-icon {
@@ -269,10 +297,16 @@ a.navbar-btn:hover {
 }
 
 .store-badge {
-    width: 360px;
+    width: 300px;
     max-width: 80%;
 }
+#home .title-btn {
+    display: none;
 
+}
+.title-block .purchases-title {
+    display: none;
+}
 footer {
     background-color: var(--text-primary);
     color: white;
@@ -299,6 +333,11 @@ footer {
     align-items: center;
     gap: 1rem;
 }
+.purchases-title {
+    margin: 0;
+    font-size: 10px;
+    color: rgb(87, 87, 87);
+}
 
 @media (max-width: 1200px) {
     .home-title {
@@ -306,6 +345,7 @@ footer {
     }
 }
 @media (max-width: 992px) {
+
     .home-container {
         flex-direction: column;
         text-align: center;
@@ -327,11 +367,14 @@ footer {
         flex: 1 1 100%;
         justify-content: center;
     }
+    .title-block .purchases-title {
+    display: block;
+}
 }
 
 @media (max-width: 768px) {
     .bg-home {
-        padding: 12rem 0 6rem 0;;
+        padding: 8rem 0 6rem 0;;
     }
     .navbar-container {
         flex-direction: column;
@@ -353,7 +396,18 @@ footer {
     }
 
     .store-badge {
-        width: 360px;
+        width: 300px;
     }
-    
+    #home .title-btn {
+        margin-top: 20px;
+        display: block;
+        inline-size: fit-content; 
+    }
+    #home .purchases-title{
+        color: black;
+        display: block;
+    }
+    .title-block .purchases-title {
+    display: none;
+}
 }

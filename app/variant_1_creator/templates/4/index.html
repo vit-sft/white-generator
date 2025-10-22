@@ -5,13 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{title}</title>
     <link rel="stylesheet" href="static/css/style.css">
+    <link rel="icon" type="image/webp" sizes="16x16" href="static/img/icon.webp" />
 </head>
 <body>
     <nav class="navbar">
         <div class="navbar-container">
             <div class="header-logo-block">
                 <img class="header-logo" src="{logo_path}" alt="{title} Logo" class="logo">
-                <a class="navbar-title" href="{app_url}">{title}</a>
+                <div class="title-block">
+                    <a class="navbar-title" href="{app_url}">{title}</a>
+                    <p class="purchases-title">In-app purchases</p>
+                </div>
             </div>
             <div class="navbar-menu">
                 <ul class="navbar-menu-list">
@@ -30,11 +34,14 @@
         <div class="home-center">
             <div class="home-container">
                 <div class="home-title">
-                    <img class="footer-logo" src="{logo_path}" alt="{title} Logo" class="logo">
+                    <div>
+                        <img class="footer-logo" src="{logo_path}" alt="{title} Logo" class="logo">
+                        <p class="home-title__purchases">In-app purchases</p>
+                    </div>
                     <h1 class="title">
                         {title}
                     </h1>
-                    <a class="title-btn" href="{app_url}">Download</a>
+                    <a class="home-title__download" href="{app_url}">Download</a>
                 </div>
                 <div class="home-visual-block">
                     <div class="phone-wrap">
@@ -43,6 +50,8 @@
                     </div>
                 </div>
             </div>
+            <a class="title-btn" href="{app_url}">Download</a>
+            <p class="purchases-title">In-app purchases</p>
         </div>
     </section>
     {components_html}
