@@ -36,13 +36,27 @@ def parse_google_play(soup: BeautifulSoup, app_url) -> dict:
         description = None
 
     # Icon URL
-    icon_img = soup.select_one("img[alt='Icon image']")
-    icon_url = icon_img['src'] if icon_img and icon_img.get('src') else None
+    images = soup.select("img[itemprop='image']")
+    icon_img = images[1]
+    if icon_img:
+        icon_url = None
+        if icon_img.get('srcset'):
+            icon_url = icon_img['srcset'].split()[-2]
+        elif icon_img.get('src'):
+            icon_url = icon_img['src']
+    else:
+        icon_url = None
 
     # Screenshot images
-    screenshot_imgs = soup.select("img[alt='Screenshot image']")
-    screenshot_urls = [img['src'] for img in screenshot_imgs if img.get('src')]
-    
+    screenshot_imgs = images[3:] if len(images) > 3 else []
+    screenshot_urls = []
+    for img in screenshot_imgs:
+        if img.get('srcset'):
+            # Use the high-res (2x) image
+            screenshot_urls.append(img['srcset'].split()[-2])
+        elif img.get('src'):
+            screenshot_urls.append(img['src'])
+        
     return {
         'title': title,
         'description': description,
@@ -114,7 +128,7 @@ def parse_app_store(soup: BeautifulSoup, app_url) -> dict:
 
 def generate_data():
     """
-    Generating example data from a...
+    Generating similar data from a...
     """
-    #TODO Generation for same return as parsers
+    #TODO Generation for the same return as parsers
     pass

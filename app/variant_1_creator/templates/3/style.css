@@ -87,6 +87,7 @@ html {
 
 .about-section {
     margin-bottom: 3rem;
+    overflow-wrap: break-word;
 }
 .about-content {
     display: flex;

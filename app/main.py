@@ -57,11 +57,18 @@ async def build_app_site(use_auto_generation: bool, url: str = None) -> str:
 if __name__ == "__main__":
     generate = False
     # app_url = "https://apps.apple.com/ua/app/chatgpt/id6448311069"
-    # app_url = "https://itunes.apple.com/ua/app/chatgpt/id6448311069"
+    app_url = "https://itunes.apple.com/ua/app/chatgpt/id6448311069"
+    # app_url = "https://apps.apple.com/ua/app/superhuman-mail/id1120837655"
+    # app_url = "https://apps.apple.com/ua/app/perplexity-ai-search-chat/id1668000334"
+    # app_url = "https://apps.apple.com/ua/app/apple-store/id375380948?l=ru"
     # app_url = "fdsfsdfsdfsd"
     # app_url = "https://play.google.com/store/apps/details?id=cfsdfsd"
     # app_url = 'https://play.google.com/store/apps/details?id=com.miHoYo.GenshinImpact&pcampaignid=merch_published_cluster_promotion_battlestar_featured_games'
     # app_url = "https://play.google.com/store/apps/details?id=ua.slando"
-    app_url = "https://market.android.com/details?id=com.google.earth"
+    # app_url = "https://market.android.com/details?id=com.google.earth"
+    # app_url = "https://play.google.com/store/apps/details?id=com.kakaogames.gbod&pcampaignid=merch_published_cluster_promotion_battlestar_featured_games"
+    # app_url = "https://play.google.com/store/apps/details?id=com.instagram.lite"
+    # app_url = "https://play.google.com/store/apps/details?id=com.lppsa.app.sinsay"
+    app_url = "https://play.google.com/store/apps/details?id=com.kakaogames.eversoul"
     abs_path = asyncio.run(build_app_site(generate, app_url))
     print(abs_path)

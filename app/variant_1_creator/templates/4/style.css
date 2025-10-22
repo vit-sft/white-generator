@@ -252,14 +252,14 @@ a.navbar-btn:hover {
     text-align: center;
 }
 
-.download-container div {
+.download-content {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 1rem;
 }
 
-.download-container h2 {
+.download-title h2 {
     font-size: 2rem;
 }
 
@@ -284,7 +284,7 @@ footer {
 .footer-logo {
     width: 80px;
     height: 80px;
-    border-radius: 50%;
+    border-radius: 25%;
     object-fit: cover;
 }
 
@@ -300,6 +300,11 @@ footer {
     gap: 1rem;
 }
 
+@media (max-width: 1200px) {
+    .home-title {
+        flex: 0 1 45%;
+    }
+}
 @media (max-width: 992px) {
     .home-container {
         flex-direction: column;
@@ -311,7 +316,7 @@ footer {
     }
 
     .home-title {
-        flex: 1 1 100%;
+        display: none;
     }
 
     .home-title h1 {
@@ -322,10 +327,6 @@ footer {
         flex: 1 1 100%;
         justify-content: center;
     }
-
-    .phone-wrap {
-        max-width: 220px;
-    }
 }
 
 @media (max-width: 768px) {
@@ -335,7 +336,7 @@ footer {
     .navbar-container {
         flex-direction: column;
     }
-    .home-title, .navbar-btn {
+    .navbar-btn {
         display: none;
     }
     .navbar-menu-list {
