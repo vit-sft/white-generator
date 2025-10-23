@@ -28,7 +28,7 @@ from .helpers import (
 
 async def build_site_from_parser(data: dict) -> str:
     """
-    Builds a site from a given data into a DIST_DIR folder
+    Builds a site from a parser data into a DIST_DIR folder
     """
 
     build_directories()
@@ -140,6 +140,9 @@ async def build_site_from_parser(data: dict) -> str:
 
 
 async def build_site_from_data(data: dict) -> str:
+    """
+    Builds a site from a pre-existing application data into a DIST_DIR folder
+    """
     build_directories()
 
     # For random template dir
@@ -149,14 +152,14 @@ async def build_site_from_data(data: dict) -> str:
     screenshot_tasks = []
 
     for screenshot_data in data["screenshots_data"]:
-        filename = hashlib.md5(screenshot_data.encode()).hexdigest() + ".png"
+        filename = hashlib.md5(screenshot_data.encode()).hexdigest() + ".webp"
         screenshot_data = base64.b64decode(screenshot_data)
         dst = os.path.join(IMG_DIR, filename)
         screenshot_tasks.append(write_bytes_file(dst, screenshot_data))
 
     icon_data = data["icon_data"]
     icon_data = base64.b64decode(icon_data)
-    filename = "icon.png"
+    filename = "icon.webp"
     icon_dst = os.path.join(IMG_DIR, filename)
 
     icon_task = write_bytes_file(icon_dst, icon_data)
