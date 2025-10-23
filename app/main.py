@@ -37,36 +37,51 @@ async def fetch_html(session, url: str) -> str:
     except Exception as e:
         raise RuntimeError(f"An unexpected error occurred while fetching '{url}': {str(e)}")
 
+
+async def build_from_app_data(app_data: AppData) -> str:
+    """
+    Build a site using pre-existing application data.
+    """
+    return await build_site_from_data(app_data)
+
+async def build_from_generated_data() -> str:
+    """
+    Generate new data and build a site from it.
+    """
+    data = await generate_data()
+    return await build_site_from_data(data)
+
+async def build_from_url(url: str) -> str:
+    """
+    Fetch HTML content from a URL and build a site from the parsed information.
+    """
+    async with ClientSession() as session:
+        html = await fetch_html(session, url)
+        parser = get_parser(url)
+        soup = BeautifulSoup(html, "html.parser")
+        data = parser(soup, url)
+        
+        if any(d is None for d in data.values()):
+            raise ValueError("Data has None values — parser couldn’t get data from link")
+        
+        return await build_site_from_parser(data)
+
+
 async def build_app_site(
     mode: BuildMode,
     app_data: Optional[AppData] = None,
     url: Optional[str] = None,
 ) -> str:
     
-    # For direct data from app_data
-    if mode == "app_data" and app_data:
-        app_data["app_url"] = 'about:blank" target="_blank'
-        abs_path = await build_site_from_data(app_data)
-        return abs_path
-    
-    # If we need to use auto generation
-    elif mode == "to_generate_data":
-        generated_data = generate_data()
-        abs_path = await build_site_from_data(generated_data)
-        return abs_path
-    
-    # If we need to use data from url
-    elif mode == "url" and url:
-        async with ClientSession() as session:
-            html = await fetch_html(session, url)
-            parser = get_parser(url)
-            soup = BeautifulSoup(html, 'html.parser')
-            data = parser(soup, url)
-            abs_path = await build_site_from_parser(data)
-            return abs_path
-    
-    else:
-        raise ValueError("Invalid parameters or missing data for selected mode.")
+    match mode:
+        case "app_data":
+            return await build_from_app_data(app_data)
+        case "to_generate_data":
+            return await build_from_generated_data()
+        case "url":
+            return await build_from_url(url)
+        case _:
+            raise ValueError(f"Invalid build mode: {mode}")
 
 
 if __name__ == "__main__":
@@ -76,20 +91,12 @@ if __name__ == "__main__":
         "iVBORw0KGgoAAAANSUhEUgAAAgAAAAIACAIAAAB7GkOtAAANGUlEQVR4nOzXjdfXdX3Hccmf5dJ2qWgSKsObFK9S0zk1bA3dOqMcYWFidFDQ2dEpaHnK3CxrYt5k2vJ03NqCOiYBbh6gA0wD3cGchLjiFEUIF8sciLuo2aEa1W7+itc5nfN6PP6A1+d3fud8z/O8B1MvGzog6ejlM6P72y86O7r/uys/Fd3/6v5vRPdXfGtfdH/CH06M7k/94zXR/Su3zYruX3LFMdH9Vauuj+4PjZ0R3X/Ljp3R/Um7D4/uH/7u86L7yxcvju6/KroOwG8tAQAoJQAApQQAoJQAAJQSAIBSAgBQSgAASgkAQCkBACglAAClBACglAAAlBIAgFICAFBKAABKCQBAKQEAKCUAAKUEAKCUAACUEgCAUgIAUEoAAEoJAEApAQAoJQAApQQAoJQAAJQSAIBSAgBQanDGwnnRB5a8+Jro/ptevCG6/x/Lvxjdv+Ggz2X3Xzw5ur93w7ro/nOPnhXd3/SDZ6L7T/7r66L7a8+/Irr/+eG/j+7fvvTe6P70x38a3T/81tnR/V0bt0T3XQAApQQAoJQAAJQSAIBSAgBQSgAASgkAQCkBACglAAClBACglAAAlBIAgFICAFBKAABKCQBAKQEAKCUAAKUEAKCUAACUEgCAUgIAUEoAAEoJAEApAQAoJQAApQQAoJQAAJQSAIBSAgBQSgAASgkAQKnBEee8J/rAxImfiO5P/vDl0f2N8+6J7t88fU90/7FLR6P75/zi+ej+tktWRfdX/HN0/oDhL98S3b/8HVOi+0Oja6P73/1Idv+8/83uLxj5z+j+5U9nv18XAEApAQAoJQAApQQAoJQAAJQSAIBSAgBQSgAASgkAQCkBACglAAClBACglAAAlBIAgFICAFBKAABKCQBAKQEAKCUAAKUEAKCUAACUEgCAUgIAUEoAAEoJAEApAQAoJQAApQQAoJQAAJQSAIBSAgBQanDh+0+NPrDtw1uj+z//6FHR/ZG1b4/uH7/4XdH9DRNXRvd33/h70f1dZ/8qun/Sax+J7h999bzo/ooX9kX3D737vuj+DSM7ovs3br8lun/zY09E96+Y9F/RfRcAQCkBACglAAClBACglAAAlBIAgFICAFBKAABKCQBAKQEAKCUAAKUEAKCUAACUEgCAUgIAUEoAAEoJAEApAQAoJQAApQQAoJQAAJQSAIBSAgBQSgAASgkAQCkBACglAAClBACglAAAlBIAgFICAFBqzAvXXxt94G/WfzW6f+u39kb3nz7m8ej+lw75TnR/5pRXovvHDR0S3f+XLaPR/dVzNkb3x78q+/9sPG11dP/lddnva/3WN0b3h++8Orq/5Iw/j+4fNX9XdN8FAFBKAABKCQBAKQEAKCUAAKUEAKCUAACUEgCAUgIAUEoAAEoJAEApAQAoJQAApQQAoJQAAJQSAIBSAgBQSgAASgkAQCkBACglAAClBACglAAAlBIAgFICAFBKAABKCQBAKQEAKCUAAKUEAKCUAACUGjPryDXRB05fsye6f/hhF0f33/TmE6L7l15zbnT/Oy8cHN2fcfKc6P6Phr4d3V/6lRXR/Z3LfxrdHzt/S3T/6guvj+7vfF/2/zn4pWnR/Umzj4/u3zH87ui+CwCglAAAlBIAgFICAFBKAABKCQBAKQEAKCUAAKUEAKCUAACUEgCAUgIAUEoAAEoJAEApAQAoJQAApQQAoJQAAJQSAIBSAgBQSgAASgkAQCkBACglAAClBACglAAAlBIAgFICAFBKAABKCQBAKQEAKDV4ZPkr0Qe2jpkR3f/FkpXR/c3Hjo/uH//v34juP7f0jOj+pi1/Ed2f/eD/Rfc/uHZqdH/ptDXR/Sen/ji6/5ovnRDdf/znP4vun/6TS6L7996wIrr/wOBj0X0XAEApAQAoJQAApQQAoJQAAJQSAIBSAgBQSgAASgkAQCkBACglAAClBACglAAAlBIAgFICAFBKAABKCQBAKQEAKCUAAKUEAKCUAACUEgCAUgIAUEoAAEoJAEApAQAoJQAApQQAoJQAAJQSAIBSAgBQavDRcZOiD9z6D7dE9x9aOCG6f/HrFkb39x/y19H9K549K7r/mX0j0f0Hjrw9un/bw6+O7g+dvTe6f9yxF0f3n314dXT/hw/Mj+7PX5/9vsZ89rTo/kFrPxvddwEAlBIAgFICAFBKAABKCQBAKQEAKCUAAKUEAKCUAACUEgCAUgIAUEoAAEoJAEApAQAoJQAApQQAoJQAAJQSAIBSAgBQSgAASgkAQCkBACglAAClBACglAAAlBIAgFICAFBKAABKCQBAKQEAKCUAAKUGe27+evSByYceHd3fv2pBdP+UdT+L7l91wqLo/ty5F0f3p7/1lOj+hgvfH93/+If2RvfHf3JmdH/zO6+J7q8ae1d2/82bo/sXHPjp6P6dp4yL7o+snhXddwEAlBIAgFICAFBKAABKCQBAKQEAKCUAAKUEAKCUAACUEgCAUgIAUEoAAEoJAEApAQAoJQAApQQAoJQAAJQSAIBSAgBQSgAASgkAQCkBACglAAClBACglAAAlBIAgFICAFBKAABKCQBAKQEAKCUAAKUGuyceFX3grPfeFd3/2udPie7vuebR6P5vrvyT6P70h2ZG96ce+D/R/fmLl0X3F117XXR/zLUHRfefGD0zun/OBeui+w/teCa6v3ncVdH9BUPZ33/mgt3RfRcAQCkBACglAAClBACglAAAlBIAgFICAFBKAABKCQBAKQEAKCUAAKUEAKCUAACUEgCAUgIAUEoAAEoJAEApAQAoJQAApQQAoJQAAJQSAIBSAgBQSgAASgkAQCkBACglAAClBACglAAAlBIAgFICAFBqcOZPtkYfWPz6a6P7C2bdFN2/4OZBdP/uLzwV3V/2yZXR/U8/PRrdv23BSdH9xfe9Orp/xLg50f3xG/80ur9/2Yei+0t+Mzu6f+W256L7u18+Irp/y7wDo/suAIBSAgBQSgAASgkAQCkBACglAAClBACglAAAlBIAgFICAFBKAABKCQBAKQEAKCUAAKUEAKCUAACUEgCAUgIAUEoAAEoJAEApAQAoJQAApQQAoJQAAJQSAIBSAgBQSgAASgkAQCkBACglAAClBACg1Jiz52Uf+LcZG6L7q/e8K7o/et+e6P7VO/4uuj/6vvHR/R3zTo3uzzlye3T/qQPmRvcves/D0f0prx+J7t9/6Fui+4MfvTe6P/lTi6L7v3PvF6L7f/CG0ei+CwCglAAAlBIAgFICAFBKAABKCQBAKQEAKCUAAKUEAKCUAACUEgCAUgIAUEoAAEoJAEApAQAoJQAApQQAoJQAAJQSAIBSAgBQSgAASgkAQCkBACglAAClBACglAAAlBIAgFICAFBKAABKCQBAKQEAKDXmtrcPRx84efNF0f2vv20kuv+Rz3wsuj9n+onR/WNuPz+6/+Pzr4ruP/vkwuj+906cGt2fPPGfovtjt18X3V977LTo/l8tHoruf2/WqdH9OXu/G92ftm9ZdN8FAFBKAABKCQBAKQEAKCUAAKUEAKCUAACUEgCAUgIAUEoAAEoJAEApAQAoJQAApQQAoJQAAJQSAIBSAgBQSgAASgkAQCkBACglAAClBACglAAAlBIAgFICAFBKAABKCQBAKQEAKCUAAKUEAKCUAACUGvz6nndGH/ijXfdH959/aiS6/4MH50f3X7thbnT/scPuiO6PvXFbdP+mwz4X3f/vCROi+9OmjI3uXzju+Oj+zuGjovuPXPeP0f2vzP51dP8d55wa3b/slx+P7rsAAEoJAEApAQAoJQAApQQAoJQAAJQSAIBSAgBQSgAASgkAQCkBACglAAClBACglAAAlBIAgFICAFBKAABKCQBAKQEAKCUAAKUEAKCUAACUEgCAUgIAUEoAAEoJAEApAQAoJQAApQQAoJQAAJQSAIBSg5e+vSn6wOl/md1fdtWD0f1Ddr0tur/im8uj+9NnvzG6P5g5I7p/xysnRfeXvLQ7uv/9Q6dF9yecdU90/4MfWBXdX/Nnb4ju33ru89H9Sz9wXnR/35JF0X0XAEApAQAoJQAApQQAoJQAAJQSAIBSAgBQSgAASgkAQCkBACglAAClBACglAAAlBIAgFICAFBKAABKCQBAKQEAKCUAAKUEAKCUAACUEgCAUgIAUEoAAEoJAEApAQAoJQAApQQAoJQAAJQSAIBSAgBQarBlxeToAyf/7Vuj+7/81f3R/W9+/9Ho/rY9U6L7J+67K7p/7vDc6P5p6w+O7g/vfia6//Lar0X3j3viguj+CV/cFN3/8ifujO7//v13R/fn3HRMdH/SZT+M7rsAAEoJAEApAQAoJQAApQQAoJQAAJQSAIBSAgBQSgAASgkAQCkBACglAAClBACglAAAlBIAgFICAFBKAABKCQBAKQEAKCUAAKUEAKCUAACUEgCAUgIAUEoAAEoJAEApAQAoJQAApQQAoJQAAJQSAIBS/x8AAP//OjV9Cbcm5NsAAAAASUVORK5CYII=",
         "iVBORw0KGgoAAAANSUhEUgAAAgAAAAIACAIAAAB7GkOtAAANGUlEQVR4nOzXjdfXdX3Hccmf5dJ2qWgSKsObFK9S0zk1bA3dOqMcYWFidFDQ2dEpaHnK3CxrYt5k2vJ03NqCOiYBbh6gA0wD3cGchLjiFEUIF8sciLuo2aEa1W7+itc5nfN6PP6A1+d3fud8z/O8B1MvGzog6ejlM6P72y86O7r/uys/Fd3/6v5vRPdXfGtfdH/CH06M7k/94zXR/Su3zYruX3LFMdH9Vauuj+4PjZ0R3X/Ljp3R/Um7D4/uH/7u86L7yxcvju6/KroOwG8tAQAoJQAApQQAoJQAAJQSAIBSAgBQSgAASgkAQCkBACglAAClBACglAAAlBIAgFICAFBKAABKCQBAKQEAKCUAAKUEAKCUAACUEgCAUgIAUEoAAEoJAEApAQAoJQAApQQAoJQAAJQSAIBSAgBQanDGwnnRB5a8+Jro/ptevCG6/x/Lvxjdv+Ggz2X3Xzw5ur93w7ro/nOPnhXd3/SDZ6L7T/7r66L7a8+/Irr/+eG/j+7fvvTe6P70x38a3T/81tnR/V0bt0T3XQAApQQAoJQAAJQSAIBSAgBQSgAASgkAQCkBACglAAClBACglAAAlBIAgFICAFBKAABKCQBAKQEAKCUAAKUEAKCUAACUEgCAUgIAUEoAAEoJAEApAQAoJQAApQQAoJQAAJQSAIBSAgBQSgAASgkAQKnBEee8J/rAxImfiO5P/vDl0f2N8+6J7t88fU90/7FLR6P75/zi+ej+tktWRfdX/HN0/oDhL98S3b/8HVOi+0Oja6P73/1Idv+8/83uLxj5z+j+5U9nv18XAEApAQAoJQAApQQAoJQAAJQSAIBSAgBQSgAASgkAQCkBACglAAClBACglAAAlBIAgFICAFBKAABKCQBAKQEAKCUAAKUEAKCUAACUEgCAUgIAUEoAAEoJAEApAQAoJQAApQQAoJQAAJQSAIBSAgBQanDh+0+NPrDtw1uj+z//6FHR/ZG1b4/uH7/4XdH9DRNXRvd33/h70f1dZ/8qun/Sax+J7h999bzo/ooX9kX3D737vuj+DSM7ovs3br8lun/zY09E96+Y9F/RfRcAQCkBACglAAClBACglAAAlBIAgFICAFBKAABKCQBAKQEAKCUAAKUEAKCUAACUEgCAUgIAUEoAAEoJAEApAQAoJQAApQQAoJQAAJQSAIBSAgBQSgAASgkAQCkBACglAAClBACglAAAlBIAgFICAFBqzAvXXxt94G/WfzW6f+u39kb3nz7m8ej+lw75TnR/5pRXovvHDR0S3f+XLaPR/dVzNkb3x78q+/9sPG11dP/lddnva/3WN0b3h++8Orq/5Iw/j+4fNX9XdN8FAFBKAABKCQBAKQEAKCUAAKUEAKCUAACUEgCAUgIAUEoAAEoJAEApAQAoJQAApQQAoJQAAJQSAIBSAgBQSgAASgkAQCkBACglAAClBACglAAAlBIAgFICAFBKAABKCQBAKQEAKCUAAKUEAKCUAACUGjPryDXRB05fsye6f/hhF0f33/TmE6L7l15zbnT/Oy8cHN2fcfKc6P6Phr4d3V/6lRXR/Z3LfxrdHzt/S3T/6guvj+7vfF/2/zn4pWnR/Umzj4/u3zH87ui+CwCglAAAlBIAgFICAFBKAABKCQBAKQEAKCUAAKUEAKCUAACUEgCAUgIAUEoAAEoJAEApAQAoJQAApQQAoJQAAJQSAIBSAgBQSgAASgkAQCkBACglAAClBACglAAAlBIAgFICAFBKAABKCQBAKQEAKDV4ZPkr0Qe2jpkR3f/FkpXR/c3Hjo/uH//v34juP7f0jOj+pi1/Ed2f/eD/Rfc/uHZqdH/ptDXR/Sen/ji6/5ovnRDdf/znP4vun/6TS6L7996wIrr/wOBj0X0XAEApAQAoJQAApQQAoJQAAJQSAIBSAgBQSgAASgkAQCkBACglAAClBACglAAAlBIAgFICAFBKAABKCQBAKQEAKCUAAKUEAKCUAACUEgCAUgIAUEoAAEoJAEApAQAoJQAApQQAoJQAAJQSAIBSAgBQavDRcZOiD9z6D7dE9x9aOCG6f/HrFkb39x/y19H9K549K7r/mX0j0f0Hjrw9un/bw6+O7g+dvTe6f9yxF0f3n314dXT/hw/Mj+7PX5/9vsZ89rTo/kFrPxvddwEAlBIAgFICAFBKAABKCQBAKQEAKCUAAKUEAKCUAACUEgCAUgIAUEoAAEoJAEApAQAoJQAApQQAoJQAAJQSAIBSAgBQSgAASgkAQCkBACglAAClBACglAAAlBIAgFICAFBKAABKCQBAKQEAKCUAAKUGe27+evSByYceHd3fv2pBdP+UdT+L7l91wqLo/ty5F0f3p7/1lOj+hgvfH93/+If2RvfHf3JmdH/zO6+J7q8ae1d2/82bo/sXHPjp6P6dp4yL7o+snhXddwEAlBIAgFICAFBKAABKCQBAKQEAKCUAAKUEAKCUAACUEgCAUgIAUEoAAEoJAEApAQAoJQAApQQAoJQAAJQSAIBSAgBQSgAASgkAQCkBACglAAClBACglAAAlBIAgFICAFBKAABKCQBAKQEAKCUAAKUGuyceFX3grPfeFd3/2udPie7vuebR6P5vrvyT6P70h2ZG96ce+D/R/fmLl0X3F117XXR/zLUHRfefGD0zun/OBeui+w/teCa6v3ncVdH9BUPZ33/mgt3RfRcAQCkBACglAAClBACglAAAlBIAgFICAFBKAABKCQBAKQEAKCUAAKUEAKCUAACUEgCAUgIAUEoAAEoJAEApAQAoJQAApQQAoJQAAJQSAIBSAgBQSgAASgkAQCkBACglAAClBACglAAAlBIAgFICAFBqcOZPtkYfWPz6a6P7C2bdFN2/4OZBdP/uLzwV3V/2yZXR/U8/PRrdv23BSdH9xfe9Orp/xLg50f3xG/80ur9/2Yei+0t+Mzu6f+W256L7u18+Irp/y7wDo/suAIBSAgBQSgAASgkAQCkBACglAAClBACglAAAlBIAgFICAFBKAABKCQBAKQEAKCUAAKUEAKCUAACUEgCAUgIAUEoAAEoJAEApAQAoJQAApQQAoJQAAJQSAIBSAgBQSgAASgkAQCkBACglAAClBACg1Jiz52Uf+LcZG6L7q/e8K7o/et+e6P7VO/4uuj/6vvHR/R3zTo3uzzlye3T/qQPmRvcves/D0f0prx+J7t9/6Fui+4MfvTe6P/lTi6L7v3PvF6L7f/CG0ei+CwCglAAAlBIAgFICAFBKAABKCQBAKQEAKCUAAKUEAKCUAACUEgCAUgIAUEoAAEoJAEApAQAoJQAApQQAoJQAAJQSAIBSAgBQSgAASgkAQCkBACglAAClBACglAAAlBIAgFICAFBKAABKCQBAKQEAKDXmtrcPRx84efNF0f2vv20kuv+Rz3wsuj9n+onR/WNuPz+6/+Pzr4ruP/vkwuj+906cGt2fPPGfovtjt18X3V977LTo/l8tHoruf2/WqdH9OXu/G92ftm9ZdN8FAFBKAABKCQBAKQEAKCUAAKUEAKCUAACUEgCAUgIAUEoAAEoJAEApAQAoJQAApQQAoJQAAJQSAIBSAgBQSgAASgkAQCkBACglAAClBACglAAAlBIAgFICAFBKAABKCQBAKQEAKCUAAKUEAKCUAACUGvz6nndGH/ijXfdH959/aiS6/4MH50f3X7thbnT/scPuiO6PvXFbdP+mwz4X3f/vCROi+9OmjI3uXzju+Oj+zuGjovuPXPeP0f2vzP51dP8d55wa3b/slx+P7rsAAEoJAEApAQAoJQAApQQAoJQAAJQSAIBSAgBQSgAASgkAQCkBACglAAClBACglAAAlBIAgFICAFBKAABKCQBAKQEAKCUAAKUEAKCUAACUEgCAUgIAUEoAAEoJAEApAQAoJQAApQQAoJQAAJQSAIBSg5e+vSn6wOl/md1fdtWD0f1Ddr0tur/im8uj+9NnvzG6P5g5I7p/xysnRfeXvLQ7uv/9Q6dF9yecdU90/4MfWBXdX/Nnb4ju33ru89H9Sz9wXnR/35JF0X0XAEApAQAoJQAApQQAoJQAAJQSAIBSAgBQSgAASgkAQCkBACglAAClBACglAAAlBIAgFICAFBKAABKCQBAKQEAKCUAAKUEAKCUAACUEgCAUgIAUEoAAEoJAEApAQAoJQAApQQAoJQAAJQSAIBSAgBQarBlxeToAyf/7Vuj+7/81f3R/W9+/9Ho/rY9U6L7J+67K7p/7vDc6P5p6w+O7g/vfia6//Lar0X3j3viguj+CV/cFN3/8ifujO7//v13R/fn3HRMdH/SZT+M7rsAAEoJAEApAQAoJQAApQQAoJQAAJQSAIBSAgBQSgAASgkAQCkBACglAAClBACglAAAlBIAgFICAFBKAABKCQBAKQEAKCUAAKUEAKCUAACUEgCAUgIAUEoAAEoJAEApAQAoJQAApQQAoJQAAJQSAIBS/x8AAP//OjV9Cbcm5NsAAAAASUVORK5CYII=",
         ])
-    # app_demo = ("dsfhlsdfklsd", "djfljsdlfjsd")
-    # app_url = "https://apps.apple.com/ua/app/chatgpt/id6448311069"
     app_url = "https://itunes.apple.com/ua/app/chatgpt/id6448311069"
     # app_url = "https://apps.apple.com/ua/app/superhuman-mail/id1120837655"
-    # app_url = "https://apps.apple.com/ua/app/perplexity-ai-search-chat/id1668000334"
-    # app_url = "https://apps.apple.com/ua/app/apple-store/id375380948?l=ru"
-    # app_url = "fdsfsdfsdfsd"
-    # app_url = "https://play.google.com/store/apps/details?id=cfsdfsd"
     # app_url = 'https://play.google.com/store/apps/details?id=com.miHoYo.GenshinImpact&pcampaignid=merch_published_cluster_promotion_battlestar_featured_games'
     # app_url = "https://play.google.com/store/apps/details?id=ua.slando"
     # app_url = "https://market.android.com/details?id=com.google.earth"
     # app_url = "https://play.google.com/store/apps/details?id=com.kakaogames.gbod&pcampaignid=merch_published_cluster_promotion_battlestar_featured_games"
-    # app_url = "https://play.google.com/store/apps/details?id=com.instagram.lite"
-    # app_url = "https://play.google.com/store/apps/details?id=com.lppsa.app.sinsay"
     app_url = "https://play.google.com/store/apps/details?id=com.kakaogames.eversoul"
-    abs_path = asyncio.run(build_app_site(mode="app_data", app_data=app_demo, url=app_url))
+    abs_path = asyncio.run(build_app_site(mode="url", app_data=app_demo, url=app_url))
     print(abs_path)
