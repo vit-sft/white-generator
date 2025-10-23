@@ -12,7 +12,7 @@ def get_parser(url: str):
     elif store == "app_store":
         return parse_app_store
 
-def parse_google_play(soup: BeautifulSoup, app_url) -> dict:
+def parse_google_play(soup: BeautifulSoup, app_url: str) -> dict:
     """
     Parser for google play links
     """
@@ -65,7 +65,7 @@ def parse_google_play(soup: BeautifulSoup, app_url) -> dict:
         'app_url': app_url
     }
 
-def parse_app_store(soup: BeautifulSoup, app_url) -> dict:
+def parse_app_store(soup: BeautifulSoup, app_url: str) -> dict:
     """
     Parser for app store links
     """
@@ -126,7 +126,7 @@ def parse_app_store(soup: BeautifulSoup, app_url) -> dict:
     }
 
 
-def generate_data():
+def generate_data() -> dict:
     """
     Generating similar data from a...
     """
