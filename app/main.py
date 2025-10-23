@@ -80,7 +80,6 @@ async def build_app_site(
     app_data: Optional[AppData] = None,
     url: Optional[str] = None,
 ) -> str:
-
     match mode:
         case "app_data":
             return await build_from_app_data(app_data)
@@ -93,7 +92,6 @@ async def build_app_site(
 
 
 if __name__ == "__main__":
-
     app_demo = AppData(
         title="DemoApp",
         description="This is a sample app used for testing the AppData schema.",

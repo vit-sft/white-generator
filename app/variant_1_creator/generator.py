@@ -52,7 +52,7 @@ async def build_site_from_parser(data: dict) -> str:
 
     # Build HTML
     screenshots_html = "\n".join(
-        f'<div><img src="static/img/{os.path.basename(p)}" alt="Screenshot {i+1}"></div>'
+        f'<div><img src="static/img/{os.path.basename(p)}" alt="Screenshot {i + 1}"></div>'
         for i, p in enumerate(screenshot_files)
     )
     components_path = os.path.join(template_dir, "components")
@@ -140,7 +140,6 @@ async def build_site_from_parser(data: dict) -> str:
 
 
 async def build_site_from_data(data: dict) -> str:
-
     build_directories()
 
     # For random template dir
@@ -171,7 +170,7 @@ async def build_site_from_data(data: dict) -> str:
 
     # Build HTML
     screenshots_html = "\n".join(
-        f'<div><img src="static/img/{os.path.basename(p)}" alt="Screenshot {i+1}"></div>'
+        f'<div><img src="static/img/{os.path.basename(p)}" alt="Screenshot {i + 1}"></div>'
         for i, p in enumerate(screenshot_files)
     )
     components_path = os.path.join(template_dir, "components")

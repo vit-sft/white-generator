@@ -1,7 +1,16 @@
 import asyncio
 import shutil
 import os
-from app.core.config import DIST_DIR, STATIC_DIR, IMG_DIR, CSS_DIR, JS_DIR, FONTS_DIR, COOKIE_DIR
+from app.core.config import (
+    DIST_DIR,
+    STATIC_DIR,
+    IMG_DIR,
+    CSS_DIR,
+    JS_DIR,
+    FONTS_DIR,
+    COOKIE_DIR,
+)
+
 
 async def copy_file_async(src, dst):
     await asyncio.to_thread(shutil.copy2, src, dst)
@@ -25,7 +34,7 @@ def remove_dir(path):
     """Removes directory if it exists"""
     if os.path.isdir(path):
         shutil.rmtree(path)
-        
+
 
 def build_directories():
     """
