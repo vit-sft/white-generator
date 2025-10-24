@@ -7,8 +7,8 @@ FONTS_DIR = os.path.join(BASE_DIR, "presets/fonts")
 
 def get_random_style():
     """
-    Selects a random template, color palette, and font for the website build.
-    Returns font_url and root for css.
+    Selects a random color palette and font for the website build.
+    Returns font directory and root for css.
     """
 
     # list of color palettes
@@ -73,6 +73,9 @@ def get_random_style():
 
 
 def get_font_face(chosen_font, font_dir):
+    """
+    Creates css block for font-face
+    """
     font_files = [f for f in os.listdir(font_dir)]
 
     if not font_files:

@@ -8,5 +8,3 @@ class AppData(TypedDict):
     description: str
     icon_data: str
     screenshots_data: list[str]
-
-BuildMode = Literal["app_data", "to_generate_data", "url"]

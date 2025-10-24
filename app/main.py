@@ -4,8 +4,8 @@ import asyncio
 from .variant_1_creator.parser import get_parser, generate_data
 from .variant_1_creator.generator import build_site_from_parser, build_site_from_data
 from .variant_1_creator.helpers import identify_store, format_error_message
-from .variant_1_creator.types import AppData, BuildMode
-from typing import Optional
+from .variant_1_creator.types import AppData
+from typing import Optional, Literal
 import random
 
 
@@ -46,6 +46,7 @@ async def build_from_app_data(app_data: AppData) -> str:
     """
     Build a site using pre-existing application data.
     """
+    app_data["app_url"] = 'about:blank" target="_blank'
     return await build_site_from_data(app_data)
 
 
@@ -76,17 +77,21 @@ async def build_from_url(url: str) -> str:
 
 
 async def build_app_site(
-    mode: BuildMode,
+    mode: Literal["app_data", "to_generate_data", "url"],
     app_data: Optional[AppData] = None,
     url: Optional[str] = None,
 ) -> str:
     match mode:
         case "app_data":
-            return await build_from_app_data(app_data)
+            if app_data:
+                return await build_from_app_data(app_data)
+            raise ValueError("In Data mode you need to put data")
         case "to_generate_data":
             return await build_from_generated_data()
         case "url":
-            return await build_from_url(url)
+            if url:
+                return await build_from_url(url)
+            raise ValueError("In URL mode you need to put url")
         case _:
             raise ValueError(f"Invalid build mode: {mode}")
 
