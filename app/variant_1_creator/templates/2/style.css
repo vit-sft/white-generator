@@ -101,6 +101,7 @@ h1 {
 }
 
 .footer-accordion {
+    background-color: var(--secondary);
     font-family: var(--font-family);
     color: var(--text-primary);
     padding: 20px;
