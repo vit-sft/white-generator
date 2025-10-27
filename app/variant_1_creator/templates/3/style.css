@@ -202,6 +202,46 @@ html {
     opacity: 0.8;
 }
 
+.footer-accordion {
+    font-family: var(--font-family);
+    color: var(--text-primary);
+    padding: 20px;
+    max-width: 1000px;
+    margin: auto;
+    width: 80%;
+}
+
+.footer-accordion h3 {
+    margin: 0;
+    padding: 15px 20px;
+    color: var(--secondary);
+    cursor: pointer;
+    user-select: none;
+    border-bottom: 1px solid #ddd;
+    font-size: 16px;
+}
+
+.footer-accordion .content {
+    display: none;
+    padding: 15px 20px;
+    color: var(--secondary);
+    border-bottom: 1px solid #ddd;
+    font-size: 14px;
+}
+
+.footer-accordion .content p {
+    margin: 10px 0;
+}
+
+.footer-accordion a {
+    color: var(--primary);
+    text-decoration: none;
+}
+
+.footer-accordion a:hover {
+    text-decoration: underline;
+}
+
 @media (max-width: 768px) {
     .about-section {
         flex-direction: column;

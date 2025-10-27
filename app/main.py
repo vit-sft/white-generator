@@ -1,4 +1,4 @@
-from aiohttp import ClientSession, client_exceptions, ClientError
+from aiohttp import ClientSession, client_exceptions
 from bs4 import BeautifulSoup
 import asyncio
 from .variant_1_creator.parser import get_parser, generate_data
@@ -6,7 +6,6 @@ from .variant_1_creator.generator import build_site_from_parser, build_site_from
 from .variant_1_creator.helpers import identify_store, format_error_message
 from .variant_1_creator.types import AppData
 from typing import Optional, Literal
-import random
 import json
 
 async def fetch_html(session, url: str) -> str:

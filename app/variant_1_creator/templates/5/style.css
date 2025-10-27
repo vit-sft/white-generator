@@ -7,10 +7,19 @@
     --border-radius: 30px;
     --transition: 0.3s;
 }
+
 @keyframes slideIn {
-    from { opacity: 0; transform: translateY(30px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
+
 * {
     margin: 0;
     padding: 0;
@@ -56,7 +65,7 @@ body {
 .nav a {
     color: var(--text-primary);
     text-decoration: none;
-    margin-left: 30px;
+    margin-left: 20px;
     transition: color var(--transition);
 }
 
@@ -78,6 +87,18 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
+}
+
+.nav-title-block {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    height: 100%;
+}
+
+.nav-title-block img {
+    height: 80%;
+    border-radius: 12px;
 }
 
 .logo {
@@ -123,6 +144,7 @@ a.download-btn:hover {
     background-color: var(--text-primary);
     color: var(--secondary);
 }
+
 .purchases-title {
     margin: 0;
     font-size: 10px;
@@ -145,6 +167,8 @@ h2 {
     padding: 30px;
     background-color: var(--secondary);
     border-top: 2px solid var(--text-primary);
+    display: flex;
+    gap: 2rem;
 }
 
 .gallery {
@@ -159,4 +183,66 @@ h2 {
     object-fit: contain;
     max-height: 40vh;
     background-color: var(--secondary);
+}
+
+.nav-link {
+    display: block;
+}
+
+.footer-accordion {
+    font-family: var(--font-family);
+    flex: 1;
+    transition: flex 0.3s ease; /* smooth grow/shrink */
+}
+
+.footer-accordion h3 {
+    margin: 0;
+    padding: 15px 20px;
+    color: var(--text-primary);
+    cursor: pointer;
+    user-select: none;
+    border-bottom: 1px solid #ddd;
+    font-size: 16px;
+    white-space: nowrap;
+}
+
+.footer-accordion .content {
+    display: none;
+    padding: 15px 20px;
+    color: var(--text-secondary);
+    border-bottom: 1px solid #ddd;
+    font-size: 14px;
+}
+
+.footer-accordion .content p {
+    margin: 10px 0;
+}
+
+.footer-accordion a {
+    color: var(--primary);
+    text-decoration: none;
+}
+
+.footer-accordion a:hover {
+    text-decoration: underline;
+}
+
+#open-cookie-settings {
+    padding: 0;
+}
+@media (max-width: 992px) {
+        .footer {
+        flex-direction: column;
+    }
+}
+@media (max-width: 768px) {
+    .nav-link {
+        display: none;
+    }
+
+    .nav {
+        justify-self: center;
+    }
+    
+
 }
