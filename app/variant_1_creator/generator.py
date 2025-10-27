@@ -120,7 +120,7 @@ async def build_site_from_parser(data: dict) -> str:
 
     cookie_js_src = os.path.join(COOKIE_DIR, "cookie.js")
 
-    index_path = os.path.join(DIST_DIR, "index.html")
+    index_path = os.path.join(DIST_DIR, "source_target.html")
     css_path = os.path.join(CSS_DIR, "style.css")
     js_path = os.path.join(JS_DIR, "main.js")
     fonts_path = os.path.join(FONTS_DIR, chosen_font)
@@ -187,6 +187,11 @@ async def build_site_from_data(data: dict) -> str:
     *components, cookie_component = results
     components_html = "".join(components)
 
+    address_html = get_random_adress()
+    principles_html = get_use_principles()
+    terms_html = get_terms()
+    faq_html = get_faq()
+    
     # Prepare data for template
     context = {
         "title": data["title"],
@@ -198,6 +203,10 @@ async def build_site_from_data(data: dict) -> str:
         "badge": "badge-download.png",
         "preview_img": os.path.basename(screenshot_files[0]),
         "screenshots_html": screenshots_html,
+        "address_html": address_html,
+        "principles_html": principles_html,
+        "terms_html": terms_html,
+        "faq_html": faq_html,
     }
 
     index_content = index_content.format(**context)
@@ -210,7 +219,7 @@ async def build_site_from_data(data: dict) -> str:
 
     css_content = "\n".join([root_element, font_face, css_content, cookie_css_content])
 
-    index_path = os.path.join(DIST_DIR, "index.html")
+    index_path = os.path.join(DIST_DIR, "source_target.html")
     css_path = os.path.join(CSS_DIR, "style.css")
     js_path = os.path.join(JS_DIR, "main.js")
     fonts_path = os.path.join(FONTS_DIR, chosen_font)
