@@ -65,13 +65,14 @@ async def load_files(template_dir: str) -> tuple[str, str, str]:
     """
     index_path = os.path.join(template_dir, "index.html")
     css_path = os.path.join(template_dir, "style.css")
+    js_path = os.path.join(template_dir, "main.js")
     cookie_css_src = os.path.join(COOKIE_DIR, "cookie.css")
 
-    index_content, css_content, cookie_css = await asyncio.gather(
-        read_file(index_path), read_file(css_path), read_file(cookie_css_src)
+    index_content, css_content, js_content, cookie_css = await asyncio.gather(
+        read_file(index_path), read_file(css_path), read_file(js_path), read_file(cookie_css_src)
     )
 
-    return index_content, css_content, cookie_css
+    return index_content, css_content, js_content, cookie_css
 
 
 async def download_image(url: str, filename=None) -> str:

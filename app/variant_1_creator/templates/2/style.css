@@ -100,6 +100,50 @@ h1 {
   order: 0;
 }
 
+.footer-accordion {
+    font-family: var(--font-family);
+    color: var(--text-primary);
+    padding: 20px;
+    max-width: 1200px;
+    margin: auto;
+}
+
+.footer-accordion h3 {
+    margin: 0;
+    padding: 15px 20px;
+    background-color: var(--secondary);
+    color: var(--primary);
+    cursor: pointer;
+    user-select: none;
+    border-bottom: 1px solid #ddd;
+    font-size: 16px;
+}
+
+.footer-accordion h3:hover {
+    background-color: #e0e0e0;
+}
+
+.footer-accordion .content {
+    display: none;
+    padding: 15px 20px;
+    color: var(--text-secondary);
+    border-bottom: 1px solid #ddd;
+    font-size: 14px;
+}
+
+.footer-accordion .content p {
+    margin: 10px 0;
+}
+
+.footer-accordion a {
+    color: var(--primary);
+    text-decoration: none;
+}
+
+.footer-accordion a:hover {
+    text-decoration: underline;
+}
+
 @media (max-width: 768px) {
     body{
         height: auto;

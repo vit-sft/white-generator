@@ -50,7 +50,7 @@ async def build_from_app_data(app_data: AppData) -> str:
     return await build_site_from_data(app_data)
 
 
-async def build_from_generated_data() -> str:
+async def build_from_generated_data(generation_query) -> str:
     """
     Generate new data and build a site from it.
     """
@@ -78,6 +78,7 @@ async def build_from_url(url: str) -> str:
 
 async def build_app_site(
     mode: Literal["app_data", "to_generate_data", "url"],
+    generation_query: Optional[str] = None,
     app_data: Optional[AppData] = None,
     url: Optional[str] = None,
 ) -> str:
@@ -87,7 +88,9 @@ async def build_app_site(
                 return await build_from_app_data(app_data)
             raise ValueError("In Data mode you need to put data")
         case "to_generate_data":
-            return await build_from_generated_data()
+            if generation_query:
+                return await build_from_generated_data(generation_query)
+            raise ValueError("In Generation mode you need to put generation query")
         case "url":
             if url:
                 return await build_from_url(url)

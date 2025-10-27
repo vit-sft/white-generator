@@ -24,7 +24,7 @@ from .helpers import (
     choose_random_template,
     PRESETS_IMG_DIR,
 )
-
+from .adresses import get_random_adress
 
 async def build_site_from_parser(data: dict) -> str:
     """
@@ -34,8 +34,8 @@ async def build_site_from_parser(data: dict) -> str:
     build_directories()
 
     # For random template dir
-    template_dir = choose_random_template()
-    # template_dir = 'C:\\Users\\u1-1824\\Desktop\\Projects\\app\\variant_1_creator\\templates\\4'
+    # template_dir = choose_random_template()
+    template_dir = 'C:\\Users\\u1-1824\\Desktop\\Projects\\app\\variant_1_creator\\templates\\2'
 
     # Download screenshots and icon to /static/img
     screenshot_tasks = [download_image(url) for url in data["screenshot_urls"]]
@@ -48,7 +48,7 @@ async def build_site_from_parser(data: dict) -> str:
     icon_path = results[-1]
 
     # Reading template files
-    index_content, css_content, cookie_css_content = await load_files(template_dir)
+    index_content, css_content, js_content, cookie_css_content = await load_files(template_dir)
 
     # Build HTML
     screenshots_html = "\n".join(
@@ -88,6 +88,7 @@ async def build_site_from_parser(data: dict) -> str:
 
     index_path = os.path.join(DIST_DIR, "index.html")
     css_path = os.path.join(CSS_DIR, "style.css")
+    js_path = os.path.join(JS_DIR, "main.js")
     fonts_path = os.path.join(FONTS_DIR, chosen_font)
 
     store = identify_store(app_url)
@@ -101,6 +102,8 @@ async def build_site_from_parser(data: dict) -> str:
 
     preview_img = os.path.basename(screenshot_files[0])
 
+    address = get_random_adress()
+    
     # Join all components into one HTML string
     components_html = "".join(components)
     index_content = index_content.format(
@@ -111,6 +114,7 @@ async def build_site_from_parser(data: dict) -> str:
         cookie_html=cookie_component,
         badge=badge,
         preview_img=preview_img,
+        address_html = address
     )
     index_content = index_content.format(
         description_html=description,
@@ -122,6 +126,7 @@ async def build_site_from_parser(data: dict) -> str:
         cookie_html=cookie_component,
         badge=badge,
         preview_img=preview_img,
+        address_html = address
     )
 
     css_content = "\n".join([root_element, font_face, css_content, cookie_css_content])
@@ -131,6 +136,7 @@ async def build_site_from_parser(data: dict) -> str:
     await asyncio.gather(
         write_file(index_path, index_content),
         write_file(css_path, css_content),
+        write_file(js_path, js_content),
         copy_file_async(cookie_js_src, JS_DIR),
         copy_all_files(font_dir, fonts_path),
         copy_all_files(PRESETS_IMG_DIR, IMG_DIR),
@@ -169,7 +175,8 @@ async def build_site_from_data(data: dict) -> str:
     screenshot_files = results[:-1]
     icon_path = results[-1]
 
-    index_content, css_content, cookie_css_content = await load_files(template_dir)
+    # Reading template files
+    index_content, css_content, js_content, cookie_css_content = await load_files(template_dir)
 
     # Build HTML
     screenshots_html = "\n".join(
@@ -209,6 +216,7 @@ async def build_site_from_data(data: dict) -> str:
 
     index_path = os.path.join(DIST_DIR, "index.html")
     css_path = os.path.join(CSS_DIR, "style.css")
+    js_path = os.path.join(JS_DIR, "main.js")
     fonts_path = os.path.join(FONTS_DIR, chosen_font)
 
     badge = "badge-download.png"
@@ -245,6 +253,7 @@ async def build_site_from_data(data: dict) -> str:
     await asyncio.gather(
         write_file(index_path, index_content),
         write_file(css_path, css_content),
+        write_file(js_path, js_content),
         copy_file_async(cookie_js_src, JS_DIR),
         copy_all_files(font_dir, fonts_path),
         copy_all_files(PRESETS_IMG_DIR, IMG_DIR),
