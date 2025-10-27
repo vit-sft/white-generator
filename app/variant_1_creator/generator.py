@@ -34,8 +34,8 @@ async def build_site_from_parser(data: dict) -> str:
     build_directories()
 
     # For random template dir
-    # template_dir = choose_random_template()
-    template_dir = 'C:\\Users\\u1-1824\\Desktop\\Projects\\app\\variant_1_creator\\templates\\2'
+    template_dir = choose_random_template()
+    # template_dir = 'C:\\Users\\u1-1824\\Desktop\\Projects\\app\\variant_1_creator\\templates\\2'
 
     # Download screenshots and icon to /static/img
     screenshot_tasks = [download_image(url) for url in data["screenshot_urls"]]
