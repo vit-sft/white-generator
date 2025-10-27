@@ -51,7 +51,7 @@ async def build_site_from_parser(data: dict) -> str:
 
     # Build screenshots HTML
     screenshots_html = "\n".join(
-        f'<div><img src="static/img/{os.path.basename(p)}" alt="Screenshot {i + 1}"></div>'
+        f'<div><img src="source_target_files/img/{os.path.basename(p)}" alt="Screenshot {i + 1}"></div>'
         for i, p in enumerate(screenshot_files)
     )
 
@@ -70,7 +70,7 @@ async def build_site_from_parser(data: dict) -> str:
     components_html = "".join(components)
 
     # Prepare app data
-    logo_path = f"static/img/{os.path.basename(icon_path)}" if icon_path else ""
+    logo_path = f"source_target_files/img/{os.path.basename(icon_path)}" if icon_path else ""
     app_url = data["app_url"]
     title = data["title"]
     description = data["description"]
@@ -169,7 +169,7 @@ async def build_site_from_data(data: dict) -> str:
 
     # Build screenshots HTML 
     screenshots_html = "\n".join(
-        f'<div><img src="static/img/{os.path.basename(p)}" alt="Screenshot {i + 1}"></div>'
+        f'<div><img src="source_target_files/img/{os.path.basename(p)}" alt="Screenshot {i + 1}"></div>'
         for i, p in enumerate(screenshot_files)
     )
 
@@ -197,7 +197,7 @@ async def build_site_from_data(data: dict) -> str:
         "title": data["title"],
         "description_html": data["description"],
         "app_url": data["app_url"],
-        "logo_path": f"static/img/{os.path.basename(icon_path)}" if icon_path else "",
+        "logo_path": f"source_target_files/img/{os.path.basename(icon_path)}" if icon_path else "",
         "components_html": components_html,
         "cookie_html": cookie_component,
         "badge": "badge-download.png",
