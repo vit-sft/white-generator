@@ -1,5 +1,8 @@
 import os
 import pathlib
+from dotenv import load_dotenv
+
+load_dotenv()
 
 APP_DIR = pathlib.Path(__file__).parent.parent
 DIST_DIR = str(APP_DIR.parent / "dist")
@@ -9,3 +12,9 @@ CSS_DIR = os.path.join(STATIC_DIR, "css")
 JS_DIR = os.path.join(STATIC_DIR, "js")
 FONTS_DIR = os.path.join(STATIC_DIR, "fonts")
 COOKIE_DIR = str(APP_DIR / "cookie")
+
+IMG_API_URL = os.getenv('IMG_API_URL')
+IMG_API_TOKEN = os.getenv('IMG_API_TOKEN')
+
+LLM_API_KEY = os.getenv('LLM_API_KEY')
+LLM_MODEL = "gemini-2.5-flash-lite"
