@@ -1,6 +1,7 @@
 import os
+from urllib.parse import urlparse
 import aiofiles
-from aiohttp import ClientSession
+from aiohttp import ClientSession, client_exceptions
 from app.core.config import (
     DIST_DIR,
     STATIC_DIR,
@@ -75,23 +76,36 @@ async def load_files(template_dir: str) -> tuple[str, str, str]:
     return index_content, css_content, js_content, cookie_css
 
 
-async def download_image(url: str, filename=None) -> str:
+async def download_image(session: ClientSession, url: str, filename=None) -> str:
     """
-    Downloads an image from url into img directory and hashes it's name
+    Downloads an image from url into IMG_DIR and hashes its name.
     """
     if not url:
         return ""
 
-    async with ClientSession() as session:
-        ext = os.path.splitext(url)[1] or ".webp"
-        url_hash = hashlib.md5(url.encode()).hexdigest()
-        if not filename:
-            filename = f"{url_hash}{ext}"
-        dst = os.path.join(IMG_DIR, filename)
+    parsed = urlparse(url)
+    ext = os.path.splitext(parsed.path)[1] or ".webp"
+    if ext.lower() not in {".jpg", ".jpeg", ".png", ".webp", ".gif", ".bmp", ".svg"}:
+        ext = ".webp"
+
+    url_hash = hashlib.md5(url.encode()).hexdigest()
+    if not filename:
+        filename = f"{url_hash}{ext}"
+    else:
+        filename = filename + ext
+
+    os.makedirs(IMG_DIR, exist_ok=True)
+    dst = os.path.join(IMG_DIR, filename)
+    try:
         async with session.get(url) as resp:
             if resp.status == 200:
                 async with aiofiles.open(dst, "wb") as f:
                     await f.write(await resp.read())
+            else:
+                return ""
+
+    except Exception:
+        return ""
     return dst
 
 

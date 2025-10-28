@@ -12,6 +12,7 @@ from app.core.config import (
     COOKIE_DIR,
 )
 import random
+from aiohttp import ClientSession
 from .styles import get_random_style, get_font_face
 from app.utils import copy_all_files, build_directories, copy_file_async
 from .helpers import (
@@ -38,14 +39,25 @@ async def build_site_from_parser(data: dict) -> str:
     template_dir = choose_random_template()
     # template_dir = 'C:\\Users\\u1-1824\\Desktop\\Projects\\app\\variant_1_creator\\templates\\5'
 
-    # Download images 
-    screenshot_tasks = [download_image(url) for url in data["screenshot_urls"]]
-    icon_task = download_image(data["icon_url"], filename="icon.webp")
-    results = await asyncio.gather(*screenshot_tasks, icon_task)
+    # Download images
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36",
+    }
+
+    async with ClientSession(headers=headers) as session:
+        screenshot_tasks = [download_image(session, url) for url in data["screenshot_urls"]]
+        icon_task = download_image(session, data["icon_url"], filename="icon")
+        results = await asyncio.gather(*screenshot_tasks, icon_task)
 
     screenshot_files = results[:-1]
     icon_path = results[-1]
 
+    # Remove failed screenshot paths
+    screenshot_files = [path for path in screenshot_files if path]
+
+    if not icon_path and screenshot_files:
+        icon_path = screenshot_files[0]
+    
     # Load template files
     index_content, css_content, js_content, cookie_css_content = await load_files(template_dir)
 

@@ -136,19 +136,19 @@ async def generate_data(generation_query: str) -> dict:
     """
     Generating data from an image API and LLM API
     """
-    icon_query = generation_query + "-slot-logo"
-    screenshots_query = generation_query + "-slot-play"
+    icon_query = generation_query + " square logo"
+    screenshots_query = generation_query + " slots play"
     async with ClientSession() as session:
         icon_task = asyncio.create_task(get_images_query(session, icon_query, 1))
         screenshots_task = asyncio.create_task(
-            get_images_query(session, screenshots_query, random.randint(3, 8))
+            get_images_query(session, screenshots_query, random.randint(4, 8))
         )
         desc_task = asyncio.create_task(generate_app_desc(generation_query))
         
         icon_url, screenshot_urls, description = await asyncio.gather(
             icon_task, screenshots_task, desc_task
         )
-    
+
     return {
         "title": generation_query,
         "description": description,

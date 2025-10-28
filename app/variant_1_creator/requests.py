@@ -1,10 +1,11 @@
 from aiohttp import ClientSession, client_exceptions
 from .helpers import identify_store, format_error_message
-from app.core.config import IMG_API_TOKEN, LLM_API_KEY, LLM_MODEL
+from app.core.config import IMG_API_TOKEN, IMG_CX, LLM_API_KEY, LLM_MODEL
 from urllib.parse import urlencode
 from google import genai
 from google.genai import types
-
+from aiohttp import ClientError
+import asyncio
 
 async def fetch_html(session: ClientSession, url: str) -> str:
     """Fetch and return HTML from an App Store or Play Store URL with friendly error handling."""
@@ -40,26 +41,44 @@ async def fetch_html(session: ClientSession, url: str) -> str:
 
 
 async def get_images_query(session: ClientSession, query: str, quantity: int):
+    """
+    Fetches image URLs from Google Search.
+    """
+
     headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
     }
+
+    all_images = []
+
     params = {
-        "page": 1,
-        "per_page": quantity,
-        "query": query,
-        "client_id": IMG_API_TOKEN,
+        "q": query,
+        "cx": IMG_CX,
+        "key": IMG_API_TOKEN,
+        "searchType": "image",
+        "safe": "off",
+        "num": quantity,
+        "start": 1
     }
-    url = f"https://api.unsplash.com/search/photos?{urlencode(params)}"
+
+    url = f"https://www.googleapis.com/customsearch/v1?{urlencode(params)}"
+    print(url)
     try:
         async with session.get(url, headers=headers) as resp:
             resp.raise_for_status()
             data = await resp.json()
-            return [img["urls"]["regular"] for img in data.get("results", [])]
+            results = data.get("items", [])
+            for item in results:
+                link = item.get("link")
+                if link:
+                    all_images.append(link)
+                    
+        return all_images
 
     except client_exceptions.InvalidURL:
         raise ValueError(
             f"The provided URL seems invalid: '{url}'. "
-            f"Please ensure it includes 'https://' and points to an image API."
+            f"Ensure it starts with 'https://' and points to a valid API."
         )
 
     except client_exceptions.ClientConnectorError:
@@ -114,23 +133,37 @@ All outputs must comply with Google and app store content policies.
 Avoid mature, suggestive, or real-world gambling contexts.
 
 Format
-Do not use Markdown. Write as html with html tags.
+Do not use Markdown. Write a html with html tags. Do not use ```html```.
 """
             ),
         ],
     )
-    chunks = []
-    async for chunk in await client.aio.models.generate_content_stream(
-        model=model,
-        contents=contents,
-        config=generate_content_config,
-    ):
-        if chunk.text:
-            chunks.append(chunk.text)
+    try:
+        chunks = []
+        async for chunk in await client.aio.models.generate_content_stream(
+            model=model,
+            contents=contents,
+            config=generate_content_config,
+        ):
+            if getattr(chunk, "text", None):
+                chunks.append(chunk.text)
 
-    result = "".join(chunks)
+        if not chunks:
+            raise ValueError("Empty response from LLM — no content generated.")
 
-    description = result.replace("{", "{{").replace("}", "}}")
+        result = "".join(chunks)
+        description = result.replace("{", "{{").replace("}", "}}")
+        return description
 
-    return description
+    except ClientError as e:
+        raise ConnectionError(f"Network or HTTP error while calling the GenAI API: {e}") from e
+
+    except asyncio.TimeoutError:
+        raise TimeoutError("The GenAI request timed out. Try again later.")
+
+    except ValueError as e:
+        raise ValueError(f"Invalid response from LLM: {e}") from e
+
+    except Exception as e:
+        raise RuntimeError(f"Unexpected error in generate_app_desc('{app_name}'): {e}") from e
         
