@@ -13,7 +13,6 @@ JS_DIR = os.path.join(STATIC_DIR, "js")
 FONTS_DIR = os.path.join(STATIC_DIR, "fonts")
 COOKIE_DIR = str(APP_DIR / "cookie")
 
-IMG_API_URL = os.getenv('IMG_API_URL')
 IMG_API_TOKEN = os.getenv('IMG_API_TOKEN')
 
 LLM_API_KEY = os.getenv('LLM_API_KEY')

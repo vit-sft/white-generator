@@ -1,6 +1,6 @@
 from aiohttp import ClientSession, client_exceptions
 from .helpers import identify_store, format_error_message
-from app.core.config import IMG_API_URL, IMG_API_TOKEN, LLM_API_KEY, LLM_MODEL
+from app.core.config import IMG_API_TOKEN, LLM_API_KEY, LLM_MODEL
 from urllib.parse import urlencode
 from google import genai
 from google.genai import types
@@ -49,7 +49,7 @@ async def get_images_query(session: ClientSession, query: str, quantity: int):
         "query": query,
         "client_id": IMG_API_TOKEN,
     }
-    url = f"{IMG_API_URL}/search/photos?{urlencode(params)}"
+    url = f"https://api.unsplash.com/search/photos?{urlencode(params)}"
     try:
         async with session.get(url, headers=headers) as resp:
             resp.raise_for_status()
