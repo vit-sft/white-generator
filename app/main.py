@@ -66,7 +66,7 @@ async def build_app_site(
 
 
 if __name__ == "__main__":
-    with open("app/core/test copy 2.json", "r") as f:
+    with open("app/core/test.json", "r") as f:
         conf_data = json.load(f)
 
     abs_path = asyncio.run(build_app_site(**conf_data))
