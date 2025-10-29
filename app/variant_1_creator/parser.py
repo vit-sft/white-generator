@@ -4,6 +4,7 @@ from .requests import get_images_query, generate_app_desc
 from aiohttp import ClientSession
 import random
 import asyncio
+from .schemas import AppUrlData
 
 
 def get_parser(url: str):
@@ -18,7 +19,7 @@ def get_parser(url: str):
         return parse_app_store
 
 
-def parse_google_play(soup: BeautifulSoup, app_url: str) -> dict:
+def parse_google_play(soup: BeautifulSoup, app_url: str) -> AppUrlData:
     """
     Parser for google play links
     """
@@ -62,16 +63,16 @@ def parse_google_play(soup: BeautifulSoup, app_url: str) -> dict:
         elif img.get("src"):
             screenshot_urls.append(img["src"])
 
-    return {
-        "title": title,
-        "description": description,
-        "icon_url": icon_url,
-        "screenshot_urls": screenshot_urls,
-        "app_url": app_url,
-    }
+    return AppUrlData(
+        title=title,
+        description=description,
+        icon_url=icon_url,
+        screenshot_urls=screenshot_urls,
+        app_url=app_url,
+    )
 
 
-def parse_app_store(soup: BeautifulSoup, app_url: str) -> dict:
+def parse_app_store(soup: BeautifulSoup, app_url: str) -> AppUrlData:
     """
     Parser for app store links
     """
@@ -123,16 +124,16 @@ def parse_app_store(soup: BeautifulSoup, app_url: str) -> dict:
                     last_url = urls[-1]
                     screenshot_urls.append(last_url)
 
-    return {
-        "title": title,
-        "description": description,
-        "icon_url": icon_url,
-        "screenshot_urls": screenshot_urls,
-        "app_url": app_url,
-    }
+    return AppUrlData(
+        title=title,
+        description=description,
+        icon_url=icon_url,
+        screenshot_urls=screenshot_urls,
+        app_url=app_url,
+    )
 
 
-async def generate_data(generation_query: str) -> dict:
+async def generate_data(generation_query: str) -> AppUrlData:
     """
     Generating data from an image API and LLM API
     """
@@ -144,15 +145,14 @@ async def generate_data(generation_query: str) -> dict:
             get_images_query(session, screenshots_query, random.randint(4, 8))
         )
         desc_task = asyncio.create_task(generate_app_desc(generation_query))
-        
+
         icon_url, screenshot_urls, description = await asyncio.gather(
             icon_task, screenshots_task, desc_task
         )
-
-    return {
-        "title": generation_query,
-        "description": description,
-        "icon_url": icon_url[0],
-        "screenshot_urls": screenshot_urls,
-        "app_url": 'about:blank" target="_blank'
-    }
+    return AppUrlData(
+        title=generation_query,
+        description=description,
+        icon_url=icon_url[0],
+        screenshot_urls=screenshot_urls,
+        app_url='about:blank" target="_blank',
+    )

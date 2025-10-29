@@ -1,22 +1,26 @@
-from aiohttp import ClientSession, client_exceptions
-from bs4 import BeautifulSoup
+import json
 import asyncio
+from aiohttp import ClientSession
+from bs4 import BeautifulSoup
+from typing import Optional, Literal
 from .variant_1_creator.parser import get_parser, generate_data
 from .variant_1_creator.generator import build_site_from_parser, build_site_from_data
 from .variant_1_creator.requests import fetch_html
-from typing import Optional, Literal
-import json
+from .variant_1_creator.schemas import AppData
 
 
-async def build_from_app_data(app_data) -> str:
+
+async def build_from_app_data(app_data: AppData) -> str:
     """
     Build a site using pre-existing application data.
     """
-    app_data["app_url"] = 'about:blank" target="_blank'
+    if isinstance(app_data, dict):
+        app_data = AppData(**app_data)
+
     return await build_site_from_data(app_data)
 
 
-async def build_from_generated_data(generation_query) -> str:
+async def build_from_generated_data(generation_query: str) -> str:
     """
     Generate new data and build a site from it.
     """
@@ -34,18 +38,13 @@ async def build_from_url(url: str) -> str:
         soup = BeautifulSoup(html, "html.parser")
         data = parser(soup, url)
 
-        if any(d is None for d in data.values()):
-            raise ValueError(
-                "Data has None values — parser couldn’t get data from link"
-            )
-
         return await build_site_from_parser(data)
 
 
 async def build_app_site(
     mode: Literal["app_data", "to_generate_data", "url"],
     generation_query: Optional[str] = None,
-    app_data: Optional[dict] = None,
+    app_data: Optional[AppData] = None,
     url: Optional[str] = None,
 ) -> str:
     match mode:

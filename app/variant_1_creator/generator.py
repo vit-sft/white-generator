@@ -27,8 +27,10 @@ from .helpers import (
 )
 from .adresses import get_random_adress
 from .footer import get_use_principles, get_terms, get_faq
+from .schemas import AppData, AppUrlData
 
-async def build_site_from_parser(data: dict) -> str:
+
+async def build_site_from_parser(data: AppUrlData) -> str:
     """
     Builds a site from a parser data into a DIST_DIR folder
     """
@@ -45,8 +47,10 @@ async def build_site_from_parser(data: dict) -> str:
     }
 
     async with ClientSession(headers=headers) as session:
-        screenshot_tasks = [download_image(session, url) for url in data["screenshot_urls"]]
-        icon_task = download_image(session, data["icon_url"], filename="icon")
+        screenshot_tasks = [
+            download_image(session, url) for url in data.screenshot_urls
+        ]
+        icon_task = download_image(session, data.icon_url, filename="icon")
         results = await asyncio.gather(*screenshot_tasks, icon_task)
 
     screenshot_files = results[:-1]
@@ -57,9 +61,11 @@ async def build_site_from_parser(data: dict) -> str:
 
     if not icon_path and screenshot_files:
         icon_path = screenshot_files[0]
-    
+
     # Load template files
-    index_content, css_content, js_content, cookie_css_content = await load_files(template_dir)
+    index_content, css_content, js_content, cookie_css_content = await load_files(
+        template_dir
+    )
 
     # Build screenshots HTML
     screenshots_html = "\n".join(
@@ -82,10 +88,12 @@ async def build_site_from_parser(data: dict) -> str:
     components_html = "".join(components)
 
     # Prepare app data
-    logo_path = f"source_target_files/img/{os.path.basename(icon_path)}" if icon_path else ""
-    app_url = data["app_url"]
-    title = data["title"]
-    description = data["description"]
+    logo_path = (
+        f"source_target_files/img/{os.path.basename(icon_path)}" if icon_path else ""
+    )
+    app_url = data.app_url
+    title = data.title
+    description = data.description
     preview_img = os.path.basename(screenshot_files[0])
 
     store = identify_store(app_url)
@@ -124,10 +132,10 @@ async def build_site_from_parser(data: dict) -> str:
         "faq_html": faq_html,
     }
 
-    # Render HTML 
+    # Render HTML
     index_content = index_content.format(**context)
     index_content = index_content.format(**context)
-    
+
     css_content = "\n".join([root_element, font_face, css_content, cookie_css_content])
 
     cookie_js_src = os.path.join(COOKIE_DIR, "cookie.js")
@@ -136,7 +144,7 @@ async def build_site_from_parser(data: dict) -> str:
     css_path = os.path.join(CSS_DIR, "style.css")
     js_path = os.path.join(JS_DIR, "main.js")
     fonts_path = os.path.join(FONTS_DIR, chosen_font)
-    
+
     await asyncio.gather(
         write_file(index_path, index_content),
         write_file(css_path, css_content),
@@ -149,37 +157,39 @@ async def build_site_from_parser(data: dict) -> str:
     return os.path.abspath(DIST_DIR)
 
 
-async def build_site_from_data(data: dict) -> str:
+async def build_site_from_data(data: AppData) -> str:
     """
     Builds a site from pre-existing application data into the DIST_DIR folder.
     """
     build_directories()
 
-    # Choose template 
+    # Choose template
     template_dir = choose_random_template()
 
-    # Prepare async tasks for screenshots 
+    # Prepare async tasks for screenshots
     screenshot_tasks = []
-    for screenshot_data in data["screenshots_data"]:
+    for screenshot_data in data.screenshots_data:
         filename = hashlib.md5(screenshot_data.encode()).hexdigest() + ".webp"
         decoded_data = base64.b64decode(screenshot_data)
         dst = os.path.join(IMG_DIR, filename)
         screenshot_tasks.append(write_bytes_file(dst, decoded_data))
 
-    # Prepare icon task 
-    icon_data = base64.b64decode(data["icon_data"])
+    # Prepare icon task
+    icon_data = base64.b64decode(data.icon_data)
     icon_dst = os.path.join(IMG_DIR, "icon.webp")
     icon_task = write_bytes_file(icon_dst, icon_data)
 
-    # Await all image writes 
+    # Await all image writes
     results = await asyncio.gather(*screenshot_tasks, icon_task)
     screenshot_files = results[:-1]
     icon_path = results[-1]
 
-    # Load template files 
-    index_content, css_content, js_content, cookie_css_content = await load_files(template_dir)
+    # Load template files
+    index_content, css_content, js_content, cookie_css_content = await load_files(
+        template_dir
+    )
 
-    # Build screenshots HTML 
+    # Build screenshots HTML
     screenshots_html = "\n".join(
         f'<div><img src="source_target_files/img/{os.path.basename(p)}" alt="Screenshot {i + 1}"></div>'
         for i, p in enumerate(screenshot_files)
@@ -203,13 +213,15 @@ async def build_site_from_data(data: dict) -> str:
     principles_html = get_use_principles()
     terms_html = get_terms()
     faq_html = get_faq()
-    
+
     # Prepare data for template
     context = {
-        "title": data["title"],
-        "description_html": data["description"],
-        "app_url": data["app_url"],
-        "logo_path": f"source_target_files/img/{os.path.basename(icon_path)}" if icon_path else "",
+        "title": data.title,
+        "description_html": data.description,
+        "app_url": data.app_url,
+        "logo_path": f"source_target_files/img/{os.path.basename(icon_path)}"
+        if icon_path
+        else "",
         "components_html": components_html,
         "cookie_html": cookie_component,
         "badge": "badge-download.png",
@@ -223,7 +235,7 @@ async def build_site_from_data(data: dict) -> str:
 
     index_content = index_content.format(**context)
     index_content = index_content.format(**context)
-    # Prepare CSS 
+    # Prepare CSS
     styles = get_random_style()
     root_element = styles["root_element"]
     chosen_font, font_dir = styles["font"]

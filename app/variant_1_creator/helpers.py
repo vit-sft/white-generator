@@ -51,7 +51,7 @@ async def write_file(path: str, content: str) -> str:
         return f.name
 
 
-async def write_bytes_file(path: str, content: str) -> str:
+async def write_bytes_file(path: str, content: bytes) -> str:
     """
     Function for writing a file by it's path and bytes content for file. Returns abs path to a file
     """
@@ -60,7 +60,7 @@ async def write_bytes_file(path: str, content: str) -> str:
         return f.name
 
 
-async def load_files(template_dir: str) -> tuple[str, str, str]:
+async def load_files(template_dir: str) -> tuple[str, str, str, str]:
     """
     Function for readings files in async from random template's folder
     """
@@ -70,7 +70,10 @@ async def load_files(template_dir: str) -> tuple[str, str, str]:
     cookie_css_src = os.path.join(COOKIE_DIR, "cookie.css")
 
     index_content, css_content, js_content, cookie_css = await asyncio.gather(
-        read_file(index_path), read_file(css_path), read_file(js_path), read_file(cookie_css_src)
+        read_file(index_path),
+        read_file(css_path),
+        read_file(js_path),
+        read_file(cookie_css_src),
     )
 
     return index_content, css_content, js_content, cookie_css

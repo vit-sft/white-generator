@@ -7,6 +7,7 @@ from google.genai import types
 from aiohttp import ClientError
 import asyncio
 
+
 async def fetch_html(session: ClientSession, url: str) -> str:
     """Fetch and return HTML from an App Store or Play Store URL with friendly error handling."""
     headers = {
@@ -45,9 +46,7 @@ async def get_images_query(session: ClientSession, query: str, quantity: int):
     Fetches image URLs from Google Search.
     """
 
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
-    }
+    headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}
 
     all_images = []
 
@@ -58,11 +57,10 @@ async def get_images_query(session: ClientSession, query: str, quantity: int):
         "searchType": "image",
         "safe": "off",
         "num": quantity,
-        "start": 1
+        "start": 1,
     }
 
     url = f"https://www.googleapis.com/customsearch/v1?{urlencode(params)}"
-    print(url)
     try:
         async with session.get(url, headers=headers) as resp:
             resp.raise_for_status()
@@ -72,7 +70,7 @@ async def get_images_query(session: ClientSession, query: str, quantity: int):
                 link = item.get("link")
                 if link:
                     all_images.append(link)
-                    
+
         return all_images
 
     except client_exceptions.InvalidURL:
@@ -156,7 +154,9 @@ Do not use Markdown. Write a html with html tags. Do not use ```html```.
         return description
 
     except ClientError as e:
-        raise ConnectionError(f"Network or HTTP error while calling the GenAI API: {e}") from e
+        raise ConnectionError(
+            f"Network or HTTP error while calling the GenAI API: {e}"
+        ) from e
 
     except asyncio.TimeoutError:
         raise TimeoutError("The GenAI request timed out. Try again later.")
@@ -165,5 +165,6 @@ Do not use Markdown. Write a html with html tags. Do not use ```html```.
         raise ValueError(f"Invalid response from LLM: {e}") from e
 
     except Exception as e:
-        raise RuntimeError(f"Unexpected error in generate_app_desc('{app_name}'): {e}") from e
-        
+        raise RuntimeError(
+            f"Unexpected error in generate_app_desc('{app_name}'): {e}"
+        ) from e
