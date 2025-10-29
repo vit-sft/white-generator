@@ -1,4 +1,3 @@
-from typing import List
 from pydantic import BaseModel, Field
 
 class AppData(BaseModel):
@@ -9,7 +8,7 @@ class AppData(BaseModel):
     title: str
     description: str
     icon_data: bytes = Field(..., description="Base64-encoded icon image")
-    screenshots_data: List[bytes] = Field(..., description="List of Base64-encoded screenshots")
+    screenshots_data: list[bytes] = Field(..., description="List of Base64-encoded screenshots")
     app_url: str = Field(default='about:blank" target="_blank', description="Default URL to open app preview or external link")
 
 class AppUrlData(BaseModel):
@@ -20,5 +19,5 @@ class AppUrlData(BaseModel):
     title: str
     description: str
     icon_url: str = Field(..., description="Url to get icon image")
-    screenshot_urls: List[str] = Field(..., description="List of urls for screenshots")
+    screenshot_urls: list[str] = Field(..., description="List of urls for screenshots")
     app_url: str = Field(..., description="URL to open app and get values from")

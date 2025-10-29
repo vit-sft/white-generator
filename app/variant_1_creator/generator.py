@@ -171,7 +171,7 @@ async def build_site_from_data(data: AppData) -> str:
     for screenshot_data in data.screenshots_data:
         filename = hashlib.md5(screenshot_data).hexdigest() + ".webp"
         dst = os.path.join(IMG_DIR, filename)
-        screenshot_tasks.append(write_bytes_file(dst, screenshot_data))
+        screenshot_tasks.append(write_bytes_file(dst, base64.b64decode(screenshot_data)))
 
     # Prepare icon task
     icon_data = base64.b64decode(data.icon_data)

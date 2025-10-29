@@ -18,3 +18,9 @@ IMG_API_TOKEN = os.getenv('IMG_API_TOKEN')
 
 LLM_API_KEY = os.getenv('LLM_API_KEY')
 LLM_MODEL = "gemini-2.5-flash-lite"
+
+ACCESS_KEY = os.getenv('ACCESS_KEY')
+ACCESS_SECRET = os.getenv('ACCESS_SECRET')
+BUCKET_NAME = "mtoffer-club"
+AWS_REGION = "eu-north-1"
+BASIC_FOLDER = 'public/cached-whites/'

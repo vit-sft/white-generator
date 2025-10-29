@@ -1,5 +1,6 @@
 import json
 import asyncio
+import hashlib
 from aiohttp import ClientSession
 from bs4 import BeautifulSoup
 from typing import Optional, Literal
@@ -7,10 +8,10 @@ from .variant_1_creator.parser import get_parser, generate_data
 from .variant_1_creator.generator import build_site_from_parser, build_site_from_data
 from .variant_1_creator.requests import fetch_html
 from .variant_1_creator.schemas import AppData
+from .bucket import check_bucket_cache, get_s3_client, upload_directory
 
 
-
-async def build_from_app_data(app_data: AppData) -> str:
+async def build_from_app_data(app_data: dict) -> str:
     """
     Build a site using pre-existing application data.
     """
@@ -42,26 +43,56 @@ async def build_from_url(url: str) -> str:
 
 
 async def build_app_site(
+    campaign_id: str,
     mode: Literal["app_data", "to_generate_data", "url"],
     generation_query: Optional[str] = None,
-    app_data: Optional[AppData] = None,
+    app_data: Optional[dict] = None,
     url: Optional[str] = None,
 ) -> str:
-    match mode:
-        case "app_data":
-            if app_data:
-                return await build_from_app_data(app_data)
-            raise ValueError("In Data mode you need to put data")
-        case "to_generate_data":
-            if generation_query:
-                return await build_from_generated_data(generation_query)
-            raise ValueError("In Generation mode you need to put generation query")
-        case "url":
-            if url:
-                return await build_from_url(url)
-            raise ValueError("In URL mode you need to put url")
-        case _:
-            raise ValueError(f"Invalid build mode: {mode}")
+    """
+    Build app site based on the given mode and install from/upload it to S3.
+    Returns destination.
+    """
+    if not campaign_id:
+        raise ValueError("campaign_id cannot be None or empty")
+
+    full_string = f"{mode or ''}{generation_query or ''}{app_data or ''}{url or ''}"
+    hashed_string = hashlib.md5(full_string.encode()).hexdigest()
+
+    # If exists in Bucket - just install and return destination
+    bucket_cache = await check_bucket_cache(campaign_id, hashed_string)
+    if bucket_cache:
+        return bucket_cache
+
+    handlers = {
+        "app_data": (
+            app_data,
+            build_from_app_data,
+            "In Data mode you need to put data",
+        ),
+        "to_generate_data": (
+            generation_query,
+            build_from_generated_data,
+            "In Generation mode you need to put generation query",
+        ),
+        "url": (url, build_from_url, "In URL mode you need to put url"),
+    }
+
+    if mode not in handlers:
+        raise ValueError(f"Invalid build mode: {mode}")
+
+    data, handler, error_message = handlers[mode]
+    if not data:
+        raise ValueError(error_message)
+
+    # Build the directory locally
+    directory = await handler(data)
+
+    # Upload to S3
+    async with await get_s3_client() as client:
+        await upload_directory(client, prefix=f"{campaign_id}_{hashed_string}")
+
+    return directory
 
 
 if __name__ == "__main__":
