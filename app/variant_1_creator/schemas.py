@@ -8,8 +8,8 @@ class AppData(BaseModel):
     """
     title: str
     description: str
-    icon_data: str = Field(..., description="Base64-encoded icon image")
-    screenshots_data: List[str] = Field(..., description="List of Base64-encoded screenshots")
+    icon_data: bytes = Field(..., description="Base64-encoded icon image")
+    screenshots_data: List[bytes] = Field(..., description="List of Base64-encoded screenshots")
     app_url: str = Field(default='about:blank" target="_blank', description="Default URL to open app preview or external link")
 
 class AppUrlData(BaseModel):
