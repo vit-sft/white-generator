@@ -8,7 +8,15 @@ from .variant_1_creator.parser import get_parser, generate_data
 from .variant_1_creator.generator import build_site_from_parser, build_site_from_data
 from .variant_1_creator.requests import fetch_html
 from .variant_1_creator.schemas import AppData
-from .bucket import check_bucket_cache, get_s3_client, upload_directory
+from .bucket import AsyncS3Client
+from app.core.config import (
+    ACCESS_KEY,
+    ACCESS_SECRET,
+    BUCKET_NAME,
+    AWS_REGION,
+    DIST_DIR,
+    BASIC_FOLDER,
+)
 
 
 async def build_from_app_data(app_data: dict) -> str:
@@ -59,44 +67,54 @@ async def build_app_site(
     full_string = f"{mode or ''}{generation_query or ''}{app_data or ''}{url or ''}"
     hashed_string = hashlib.md5(full_string.encode()).hexdigest()
 
-    # If exists in Bucket - just install and return destination
-    bucket_cache = await check_bucket_cache(campaign_id, hashed_string)
-    if bucket_cache:
-        return bucket_cache
+    # Using Bucket client to make bucket operations
+    async with AsyncS3Client(
+        region_name=AWS_REGION,
+        aws_access_key_id=ACCESS_KEY,
+        aws_secret_access_key=ACCESS_SECRET,
+        bucket_name=BUCKET_NAME,
+        basic_folder=BASIC_FOLDER,
+    ) as bucket_client:
+        bucket_cache = await bucket_client.check_bucket_cache(
+            destination=DIST_DIR, campaign_id=campaign_id, hashed_string=hashed_string
+        )
+        if bucket_cache:
+            return bucket_cache
 
-    handlers = {
-        "app_data": (
-            app_data,
-            build_from_app_data,
-            "In Data mode you need to put data",
-        ),
-        "to_generate_data": (
-            generation_query,
-            build_from_generated_data,
-            "In Generation mode you need to put generation query",
-        ),
-        "url": (url, build_from_url, "In URL mode you need to put url"),
-    }
+        handlers = {
+            "app_data": (
+                app_data,
+                build_from_app_data,
+                "In Data mode you need to put data",
+            ),
+            "to_generate_data": (
+                generation_query,
+                build_from_generated_data,
+                "In Generation mode you need to put generation query",
+            ),
+            "url": (url, build_from_url, "In URL mode you need to put url"),
+        }
 
-    if mode not in handlers:
-        raise ValueError(f"Invalid build mode: {mode}")
+        if mode not in handlers:
+            raise ValueError(f"Invalid build mode: {mode}")
 
-    data, handler, error_message = handlers[mode]
-    if not data:
-        raise ValueError(error_message)
+        data, handler, error_message = handlers[mode]
+        if not data:
+            raise ValueError(error_message)
 
-    # Build the directory locally
-    directory = await handler(data)
+        # Build the directory locally
+        directory = await handler(data)
 
-    # Upload to S3
-    async with await get_s3_client() as client:
-        await upload_directory(client, prefix=f"{campaign_id}_{hashed_string}")
+        # Upload to S3
 
-    return directory
+        await bucket_client.upload_directory(
+            origin=DIST_DIR, prefix=f"{campaign_id}_{hashed_string}"
+        )
+        return directory
 
 
 if __name__ == "__main__":
-    with open("app/core/test.json", "r") as f:
+    with open("app/core/test copy.json", "r") as f:
         conf_data = json.load(f)
 
     abs_path = asyncio.run(build_app_site(**conf_data))
