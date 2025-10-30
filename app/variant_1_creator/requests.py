@@ -4,6 +4,7 @@ from app.core.config import IMG_API_TOKEN, IMG_CX, LLM_API_KEY, LLM_MODEL
 from urllib.parse import urlencode
 from google import genai
 from google.genai import types
+from google.api_core import exceptions as google_exceptions
 from aiohttp import ClientError
 import asyncio
 
@@ -63,8 +64,14 @@ async def get_images_query(session: ClientSession, query: str, quantity: int):
     url = f"https://www.googleapis.com/customsearch/v1?{urlencode(params)}"
     try:
         async with session.get(url, headers=headers) as resp:
-            resp.raise_for_status()
+            
             data = await resp.json()
+            if "error" in data:
+                error_info = data["error"]
+                message = error_info.get("message", "Unknown Google API error")
+                code = error_info.get("code", "N/A")
+                raise RuntimeError(f"Google API error {code}: {message}")
+            
             results = data.get("items", [])
             for item in results:
                 link = item.get("link")
@@ -76,7 +83,6 @@ async def get_images_query(session: ClientSession, query: str, quantity: int):
     except client_exceptions.InvalidURL:
         raise ValueError(
             f"The provided URL seems invalid: '{url}'. "
-            f"Ensure it starts with 'https://' and points to a valid API."
         )
 
     except client_exceptions.ClientConnectorError:
@@ -164,7 +170,8 @@ Do not use Markdown. Write a html with html tags. Do not use ```html```.
     except ValueError as e:
         raise ValueError(f"Invalid response from LLM: {e}") from e
 
+    except google_exceptions.ResourceExhausted as e:
+        raise google_exceptions.ResourceExhausted(f"Rate limit hit: {e}")
+    
     except Exception as e:
-        raise RuntimeError(
-            f"Unexpected error in generate_app_desc('{app_name}'): {e}"
-        ) from e
+        raise RuntimeError(f"Unexpected error: {e}") from e
