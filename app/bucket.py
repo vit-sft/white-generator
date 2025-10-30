@@ -8,6 +8,7 @@ from .utils import build_directories
 class AsyncS3Client:
     """
     Async client for AWS S3 Bucket operations (list, upload, download, delete).
+    Has to be in async with statement.
     """
     def __init__(
         self,
@@ -66,6 +67,11 @@ class AsyncS3Client:
 
     async def upload_directory(self, origin: str, prefix: str):
         """Recursively upload all files in a origin directory to Bucket"""
+        
+        # Define the key prefix and cloud base URL
+        key_prefix = f"{self.basic_folder}{prefix}".rstrip("/")
+        base_url = f"https://{self.bucket_name}.s3.{self.region_name}.amazonaws.com/{key_prefix}/source_target.html"
+        
         for root, _, files in os.walk(origin):
             for filename in files:
                 local_path = os.path.join(root, filename)
@@ -77,6 +83,7 @@ class AsyncS3Client:
                     await self._client.put_object(
                         Bucket=self.bucket_name, Key=key, Body=body
                     )
+        return base_url
 
     async def delete_directory(self, prefix: str) -> None:
         """Delete all S3 objects under directory."""
@@ -113,7 +120,10 @@ class AsyncS3Client:
             return
 
         build_directories()
-
+        # Define the key prefix and cloud base URL
+        key_prefix = f"{self.basic_folder}{prefix}".rstrip("/")
+        base_url = f"https://{self.bucket_name}.s3.{self.region_name}.amazonaws.com/{key_prefix}/source_target.html"
+        
         tasks = []
         for obj in objects_to_install:
             key = obj
@@ -127,7 +137,7 @@ class AsyncS3Client:
             tasks.append(self.download_file(key, local_path))
 
         await asyncio.gather(*tasks)
-        return os.path.abspath(destination)
+        return os.path.abspath(destination), base_url
 
     async def check_bucket_cache(self, destination: str, campaign_id: str, hashed_string: str):
         """
@@ -148,4 +158,4 @@ class AsyncS3Client:
                 key = key.removeprefix(self.basic_folder)
                 await self.delete_directory(prefix=key)
                 break
-        return None
+        return None, None

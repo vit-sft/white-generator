@@ -1,16 +1,7 @@
 import asyncio
 import shutil
 import os
-from app.core.config import (
-    DIST_DIR,
-    STATIC_DIR,
-    IMG_DIR,
-    CSS_DIR,
-    JS_DIR,
-    FONTS_DIR,
-    COOKIE_DIR,
-)
-
+from app.core.config import config
 
 async def copy_file_async(src, dst):
     await asyncio.to_thread(shutil.copy2, src, dst)
@@ -40,8 +31,8 @@ def build_directories():
     """
     Removes old dir and creates new folders for site
     """
-    remove_dir(DIST_DIR)
-    dirs_to_create = [DIST_DIR, STATIC_DIR, IMG_DIR, CSS_DIR, JS_DIR, FONTS_DIR]
+    remove_dir(config.DIST_DIR)
+    dirs_to_create = [config.DIST_DIR, config.STATIC_DIR, config.IMG_DIR, config.CSS_DIR, config.JS_DIR, config.FONTS_DIR]
 
     for directory in dirs_to_create:
         os.makedirs(directory, exist_ok=True)

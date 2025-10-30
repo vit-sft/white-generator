@@ -2,15 +2,7 @@ import os
 from urllib.parse import urlparse
 import aiofiles
 from aiohttp import ClientSession, client_exceptions
-from app.core.config import (
-    DIST_DIR,
-    STATIC_DIR,
-    IMG_DIR,
-    CSS_DIR,
-    JS_DIR,
-    FONTS_DIR,
-    COOKIE_DIR,
-)
+from app.core.config import config
 import asyncio
 import hashlib
 import random
@@ -67,7 +59,7 @@ async def load_files(template_dir: str) -> tuple[str, str, str, str]:
     index_path = os.path.join(template_dir, "index.html")
     css_path = os.path.join(template_dir, "style.css")
     js_path = os.path.join(template_dir, "main.js")
-    cookie_css_src = os.path.join(COOKIE_DIR, "cookie.css")
+    cookie_css_src = os.path.join(config.COOKIE_DIR, "cookie.css")
 
     index_content, css_content, js_content, cookie_css = await asyncio.gather(
         read_file(index_path),
@@ -97,8 +89,8 @@ async def download_image(session: ClientSession, url: str, filename=None) -> str
     else:
         filename = filename + ext
 
-    os.makedirs(IMG_DIR, exist_ok=True)
-    dst = os.path.join(IMG_DIR, filename)
+    os.makedirs(config.IMG_DIR, exist_ok=True)
+    dst = os.path.join(config.IMG_DIR, filename)
     try:
         async with session.get(url) as resp:
             if resp.status == 200:

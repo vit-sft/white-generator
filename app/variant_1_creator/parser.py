@@ -1,9 +1,5 @@
 from bs4 import BeautifulSoup
 from .helpers import identify_store
-from .requests import get_images_query, generate_app_desc
-from aiohttp import ClientSession
-import random
-import asyncio
 from .schemas import AppUrlData
 
 
@@ -130,29 +126,4 @@ def parse_app_store(soup: BeautifulSoup, app_url: str) -> AppUrlData:
         icon_url=icon_url,
         screenshot_urls=screenshot_urls,
         app_url=app_url,
-    )
-
-
-async def generate_data(generation_query: str) -> AppUrlData:
-    """
-    Generating data from an image API and LLM API
-    """
-    icon_query = generation_query + " square logo"
-    screenshots_query = generation_query + " slots play"
-    async with ClientSession() as session:
-        icon_task = asyncio.create_task(get_images_query(session, icon_query, 1))
-        screenshots_task = asyncio.create_task(
-            get_images_query(session, screenshots_query, random.randint(4, 8))
-        )
-        desc_task = asyncio.create_task(generate_app_desc(generation_query))
-
-        icon_url, screenshot_urls, description = await asyncio.gather(
-            icon_task, screenshots_task, desc_task
-        )
-    return AppUrlData(
-        title=generation_query,
-        description=description,
-        icon_url=icon_url[0],
-        screenshot_urls=screenshot_urls,
-        app_url='about:blank" target="_blank',
     )

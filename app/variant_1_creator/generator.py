@@ -1,261 +1,181 @@
-import os
-import asyncio
-import hashlib
-import base64
-from app.core.config import (
-    DIST_DIR,
-    STATIC_DIR,
-    IMG_DIR,
-    CSS_DIR,
-    JS_DIR,
-    FONTS_DIR,
-    COOKIE_DIR,
-)
+from app.core.config import config
+from urllib.parse import urlencode
+from google import genai
+from google.genai import types
+from google.api_core import exceptions as google_exceptions
+from aiohttp import ClientSession, client_exceptions, ClientError
 import random
-from aiohttp import ClientSession
-from .styles import get_random_style, get_font_face
-from app.utils import copy_all_files, build_directories, copy_file_async
-from .helpers import (
-    identify_store,
-    write_file,
-    write_bytes_file,
-    read_file,
-    load_files,
-    download_image,
-    choose_random_template,
-    PRESETS_IMG_DIR,
-)
-from .adresses import get_random_adress
-from .footer import get_use_principles, get_terms, get_faq
-from .schemas import AppData, AppUrlData
+import asyncio
+from .schemas import AppUrlData
 
 
-async def build_site_from_parser(data: AppUrlData) -> str:
+class AppDataGenerator:
     """
-    Builds a site from a parser data into a DIST_DIR folder
+    Async client for app data generation. 
+    Has to be in async with statement. 
     """
 
-    build_directories()
+    def __init__(self, img_cx: str, img_api_token: str, llm_api_key: str):
+        self.img_cx = img_cx
+        self.img_api_token = img_api_token
+        self.llm_api_key = llm_api_key
+        self._session: ClientSession | None = None
+        self._llm_client = genai.Client(api_key=self.llm_api_key)
 
-    # For random template dir
-    template_dir = choose_random_template()
-    # template_dir = "C:\\Users\\u1-1824\\Documents\\Projects\\Projects\\app\\variant_1_creator\\templates\\4"
+    async def __aenter__(self):
+        self._session = ClientSession()
+        return self
 
-    # Download images
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36",
-    }
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        if self._session:
+            await self._session.close()
 
-    async with ClientSession(headers=headers) as session:
-        screenshot_tasks = [
-            download_image(session, url) for url in data.screenshot_urls
+    async def get_images_query(self, query: str, quantity: int):
+        """
+        Fetches image URLs from Google Search.
+        """
+
+        headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}
+
+        all_images = []
+
+        params = {
+            "q": query,
+            "cx": self.img_cx,
+            "key": self.img_api_token,
+            "searchType": "image",
+            "safe": "off",
+            "num": quantity,
+            "start": 1,
+        }
+
+        url = f"https://www.googleapis.com/customsearch/v1?{urlencode(params)}"
+        try:
+            async with self._session.get(url, headers=headers) as resp:
+                data = await resp.json()
+                if "error" in data:
+                    error_info = data["error"]
+                    message = error_info.get("message", "Unknown Google API error")
+                    code = error_info.get("code", "N/A")
+                    raise RuntimeError(f"Google API error {code}: {message}")
+
+                results = data.get("items", [])
+                for item in results:
+                    link = item.get("link")
+                    if link:
+                        all_images.append(link)
+
+            return all_images
+
+        except client_exceptions.InvalidURL:
+            raise ValueError(f"The provided URL seems invalid: '{url}'. ")
+
+        except client_exceptions.ClientConnectorError:
+            raise ConnectionError(
+                f"Could not connect to '{url}'. Check your internet connection or verify that the API is reachable."
+            )
+
+        except Exception as e:
+            raise RuntimeError(
+                f"An unexpected error occurred while fetching '{url}': {str(e)}"
+            )
+
+    async def generate_app_desc(self, app_name):
+        model = config.LLM_MODEL
+        promt = f"Write a short, engaging app store description for an app called '{app_name}'."
+        contents = [
+            types.Content(
+                role="user",
+                parts=[
+                    types.Part.from_text(text=promt),
+                ],
+            ),
         ]
-        icon_task = download_image(session, data.icon_url, filename="icon")
-        results = await asyncio.gather(*screenshot_tasks, icon_task)
+        tools = [
+            types.Tool(googleSearch=types.GoogleSearch()),
+        ]
+        generate_content_config = types.GenerateContentConfig(
+            thinking_config=types.ThinkingConfig(
+                thinking_budget=-1,
+            ),
+            tools=tools,
+            system_instruction=[
+                types.Part.from_text(
+                    text="""Role / Purpose:
+    You are an assistant that writes creative, engaging, and family-friendly descriptions for entertainment apps themed around “slots”, “spinning reels”.
 
-    screenshot_files = results[:-1]
-    icon_path = results[-1]
+    Tone & Style
+    Use vivid, energetic, and engaging language.
+    Keep it concise and upbeat — think app-store friendly (≈150–200 words).
+    Prohibited Language
+    Avoid words like \"win big”, “earn”, or “gamble.”
+    Don’t reference risk, odds, or financial gain.
+    Safety & Policy
+    All outputs must comply with Google and app store content policies.
+    Avoid mature, suggestive, or real-world gambling contexts.
 
-    # Remove failed screenshot paths
-    screenshot_files = [path for path in screenshot_files if path]
-
-    if not icon_path and screenshot_files:
-        icon_path = screenshot_files[0]
-
-    # Load template files
-    index_content, css_content, js_content, cookie_css_content = await load_files(
-        template_dir
-    )
-
-    # Build screenshots HTML
-    screenshots_html = "\n".join(
-        f'<div><img src="source_target_files/img/{os.path.basename(p)}" alt="Screenshot {i + 1}"></div>'
-        for i, p in enumerate(screenshot_files)
-    )
-
-    # Load components
-    components_path = os.path.join(template_dir, "components")
-    component_files = os.listdir(components_path)
-    random.shuffle(component_files)
-
-    cookie_html_src = os.path.join(COOKIE_DIR, "cookie.html")
-    component_tasks = [
-        read_file(os.path.join(components_path, f)) for f in component_files
-    ] + [read_file(cookie_html_src)]
-    results = await asyncio.gather(*component_tasks)
-    *components, cookie_component = results
-
-    components_html = "".join(components)
-
-    # Prepare app data
-    logo_path = (
-        f"source_target_files/img/{os.path.basename(icon_path)}" if icon_path else ""
-    )
-    app_url = data.app_url
-    title = data.title
-    description = data.description
-    preview_img = os.path.basename(screenshot_files[0])
-
-    store = identify_store(app_url)
-    badge_map = {
-        "play_store": "badge-google-market.png",
-        "app_store": "badge-apple-store.png",
-    }
-    badge = badge_map.get(store, "badge-download.png")
-
-    # Random elements
-    styles = get_random_style()
-    chosen_font, font_dir = styles["font"]
-    root_element = styles["root_element"]
-
-    font_face = get_font_face(chosen_font, font_dir)
-
-    address_html = get_random_adress()
-    principles_html = get_use_principles()
-    terms_html = get_terms()
-    faq_html = get_faq()
-
-    # Build context dictionary
-    context = {
-        "title": title,
-        "description_html": description,
-        "app_url": app_url,
-        "logo_path": logo_path,
-        "components_html": components_html,
-        "screenshots_html": screenshots_html,
-        "cookie_html": cookie_component,
-        "badge": badge,
-        "preview_img": preview_img,
-        "background_img": random.choice([preview_img, ""]),
-        "address_html": address_html,
-        "principles_html": principles_html,
-        "terms_html": terms_html,
-        "faq_html": faq_html,
-    }
-
-    # Render HTML
-    index_content = index_content.format(**context)
-    index_content = index_content.format(**context)
-
-    css_content = "\n".join([root_element, font_face, css_content, cookie_css_content])
-
-    cookie_js_src = os.path.join(COOKIE_DIR, "cookie.js")
-
-    index_path = os.path.join(DIST_DIR, "source_target.html")
-    css_path = os.path.join(CSS_DIR, "style.css")
-    js_path = os.path.join(JS_DIR, "main.js")
-    fonts_path = os.path.join(FONTS_DIR, chosen_font)
-
-    await asyncio.gather(
-        write_file(index_path, index_content),
-        write_file(css_path, css_content),
-        write_file(js_path, js_content),
-        copy_file_async(cookie_js_src, JS_DIR),
-        copy_all_files(font_dir, fonts_path),
-        copy_all_files(PRESETS_IMG_DIR, IMG_DIR),
-    )
-
-    return os.path.abspath(DIST_DIR)
-
-
-async def build_site_from_data(data: AppData) -> str:
+    Format
+    Do not use Markdown. Write a html with html tags. Do not use ```html```.
     """
-    Builds a site from pre-existing application data into the DIST_DIR folder.
-    """
-    build_directories()
+                ),
+            ],
+        )
+        try:
+            chunks = []
+            async for (
+                chunk
+            ) in await self._llm_client.aio.models.generate_content_stream(
+                model=model,
+                contents=contents,
+                config=generate_content_config,
+            ):
+                if getattr(chunk, "text", None):
+                    chunks.append(chunk.text)
 
-    # Choose template
-    template_dir = choose_random_template()
+            if not chunks:
+                raise ValueError("Empty response from LLM — no content generated.")
 
-    # Prepare async tasks for screenshots
-    screenshot_tasks = []
-    for screenshot_data in data.screenshots_data:
-        filename = hashlib.md5(screenshot_data).hexdigest() + ".webp"
-        dst = os.path.join(IMG_DIR, filename)
-        screenshot_tasks.append(write_bytes_file(dst, base64.b64decode(screenshot_data)))
+            result = "".join(chunks)
+            description = result.replace("{", "{{").replace("}", "}}")
+            return description
 
-    # Prepare icon task
-    icon_data = base64.b64decode(data.icon_data)
-    icon_dst = os.path.join(IMG_DIR, "icon.webp")
-    icon_task = write_bytes_file(icon_dst, icon_data)
+        except ClientError as e:
+            raise ConnectionError(
+                f"Network or HTTP error while calling the GenAI API: {e}"
+            ) from e
 
-    # Await all image writes
-    results = await asyncio.gather(*screenshot_tasks, icon_task)
-    screenshot_files = results[:-1]
-    icon_path = results[-1]
+        except asyncio.TimeoutError:
+            raise TimeoutError("The GenAI request timed out. Try again later.")
 
-    # Load template files
-    index_content, css_content, js_content, cookie_css_content = await load_files(
-        template_dir
-    )
+        except ValueError as e:
+            raise ValueError(f"Invalid response from LLM: {e}") from e
 
-    # Build screenshots HTML
-    screenshots_html = "\n".join(
-        f'<div><img src="source_target_files/img/{os.path.basename(p)}" alt="Screenshot {i + 1}"></div>'
-        for i, p in enumerate(screenshot_files)
-    )
+        except google_exceptions.ResourceExhausted as e:
+            raise google_exceptions.ResourceExhausted(f"Rate limit hit: {e}")
 
-    # Load components
-    components_path = os.path.join(template_dir, "components")
-    component_files = os.listdir(components_path)
-    random.shuffle(component_files)
-    cookie_html_src = os.path.join(COOKIE_DIR, "cookie.html")
+        except Exception as e:
+            raise RuntimeError(f"Unexpected error: {e}") from e
 
-    component_tasks = [
-        read_file(os.path.join(components_path, f)) for f in component_files
-    ] + [read_file(cookie_html_src)]
+    async def generate_data(self, generation_query: str) -> AppUrlData:
+        """
+        Generating data from an image API and LLM API
+        """
+        icon_query = generation_query + " square logo"
+        screenshots_query = generation_query + " slots play"
 
-    results = await asyncio.gather(*component_tasks)
-    *components, cookie_component = results
-    components_html = "".join(components)
+        icon_task = asyncio.create_task(self.get_images_query(icon_query, 1))
+        screenshots_task = asyncio.create_task(
+            self.get_images_query(screenshots_query, random.randint(4, 8))
+        )
+        desc_task = asyncio.create_task(self.generate_app_desc(generation_query))
 
-    address_html = get_random_adress()
-    principles_html = get_use_principles()
-    terms_html = get_terms()
-    faq_html = get_faq()
-
-    # Prepare data for template
-    context = {
-        "title": data.title,
-        "description_html": data.description,
-        "app_url": data.app_url,
-        "logo_path": f"source_target_files/img/{os.path.basename(icon_path)}"
-        if icon_path
-        else "",
-        "components_html": components_html,
-        "cookie_html": cookie_component,
-        "badge": "badge-download.png",
-        "preview_img": os.path.basename(screenshot_files[0]),
-        "screenshots_html": screenshots_html,
-        "address_html": address_html,
-        "principles_html": principles_html,
-        "terms_html": terms_html,
-        "faq_html": faq_html,
-    }
-
-    index_content = index_content.format(**context)
-    index_content = index_content.format(**context)
-    # Prepare CSS
-    styles = get_random_style()
-    root_element = styles["root_element"]
-    chosen_font, font_dir = styles["font"]
-    font_face = get_font_face(chosen_font, font_dir)
-
-    css_content = "\n".join([root_element, font_face, css_content, cookie_css_content])
-
-    index_path = os.path.join(DIST_DIR, "source_target.html")
-    css_path = os.path.join(CSS_DIR, "style.css")
-    js_path = os.path.join(JS_DIR, "main.js")
-    fonts_path = os.path.join(FONTS_DIR, chosen_font)
-    cookie_js_src = os.path.join(COOKIE_DIR, "cookie.js")
-
-    await asyncio.gather(
-        write_file(index_path, index_content),
-        write_file(css_path, css_content),
-        write_file(js_path, js_content),
-        copy_file_async(cookie_js_src, JS_DIR),
-        copy_all_files(font_dir, fonts_path),
-        copy_all_files(PRESETS_IMG_DIR, IMG_DIR),
-    )
-
-    return os.path.abspath(DIST_DIR)
+        icon_url, screenshot_urls, description = await asyncio.gather(
+            icon_task, screenshots_task, desc_task
+        )
+        return AppUrlData(
+            title=generation_query,
+            description=description,
+            icon_url=icon_url[0],
+            screenshot_urls=screenshot_urls,
+            app_url='about:blank" target="_blank',
+        )

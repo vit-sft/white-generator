@@ -1,26 +1,33 @@
 import os
 import pathlib
-from dotenv import load_dotenv
 
-load_dotenv()
 
-APP_DIR = pathlib.Path(__file__).parent.parent
-DIST_DIR = str(APP_DIR.parent / "dist")
-STATIC_DIR = os.path.join(DIST_DIR, "source_target_files")
-IMG_DIR = os.path.join(STATIC_DIR, "img")
-CSS_DIR = os.path.join(STATIC_DIR, "css")
-JS_DIR = os.path.join(STATIC_DIR, "js")
-FONTS_DIR = os.path.join(STATIC_DIR, "fonts")
-COOKIE_DIR = str(APP_DIR / "cookie")
+class AppConfig:
+    def __init__(self):
+        self.APP_DIR = pathlib.Path(__file__).parent.parent
+        self.COOKIE_DIR = str(self.APP_DIR / "cookie")
+        
+        self.DIST_DIR = None
+        self.STATIC_DIR = None
+        self.IMG_DIR = None
+        self.CSS_DIR = None
+        self.JS_DIR = None
+        self.FONTS_DIR = None
 
-IMG_CX = os.getenv('IMG_CX')
-IMG_API_TOKEN = os.getenv('IMG_API_TOKEN')
+        # Static settings
+        self.LLM_MODEL = "gemini-2.5-flash-lite"
+        self.BUCKET_NAME = "mtoffer-club"
+        self.AWS_REGION = "eu-north-1"
+        self.BASIC_FOLDER = "public/cached-whites/"
 
-LLM_API_KEY = os.getenv('LLM_API_KEY')
-LLM_MODEL = "gemini-2.5-flash-lite"
+    def set_dist_dir(self, path: str):
+        """Set the base build directory and dependent paths."""
+        self.DIST_DIR = os.path.abspath(path)
+        self.STATIC_DIR = os.path.join(self.DIST_DIR, "source_target_files")
+        self.IMG_DIR = os.path.join(self.STATIC_DIR, "img")
+        self.CSS_DIR = os.path.join(self.STATIC_DIR, "css")
+        self.JS_DIR = os.path.join(self.STATIC_DIR, "js")
+        self.FONTS_DIR = os.path.join(self.STATIC_DIR, "fonts")
 
-ACCESS_KEY = os.getenv('ACCESS_KEY')
-ACCESS_SECRET = os.getenv('ACCESS_SECRET')
-BUCKET_NAME = "mtoffer-club"
-AWS_REGION = "eu-north-1"
-BASIC_FOLDER = 'public/cached-whites/'
+
+config = AppConfig()
