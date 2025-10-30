@@ -6,6 +6,9 @@ from .utils import build_directories
 
 
 class AsyncS3Client:
+    """
+    Async client for AWS S3 Bucket operations (list, upload, download, delete).
+    """
     def __init__(
         self,
         region_name="eu-north-1",
@@ -23,13 +26,16 @@ class AsyncS3Client:
         self._client = None
 
     async def __aenter__(self):
+        # Create S3 client when entering async context
         self._client = await self._create_client()
         return self
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):
+        # Close S3 client when exiting async context
         await self._client.close()
 
     async def _create_client(self):
+        # Initialize S3 async client
         return await self._session.create_client(
             "s3",
             region_name=self.region_name,
