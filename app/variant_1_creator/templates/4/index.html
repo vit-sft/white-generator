@@ -32,7 +32,13 @@
             </div>
         </div>
     </nav>
-    <section class="bg-home" id="home">
+    <section class="bg-home" id="home" style="  background-image:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--secondary) 60%, transparent),
+      color-mix(in srgb, var(--text-secondary) 90%, transparent)
+    ),
+    url(source_target_files/img/{background_img});">
         <div class="home-center">
             <div class="home-container">
                 <div class="home-title">
@@ -59,7 +65,8 @@
     {components_html}
     <div id="download" class="download-container">
         <div class="download-content">
-            <div><a href="{app_url}"><img class="download-icon" src="source_target_files/img/download.png" alt=""></div></a>
+            <div><a href="{app_url}"><img class="download-icon" src="source_target_files/img/download.png" alt=""></div>
+            </a>
             <div class="download-title">
                 <h2>Download</h2>
             </div>

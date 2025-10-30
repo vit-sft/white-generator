@@ -90,9 +90,11 @@ a.navbar-btn:hover {
     transform: translateY(-2px);
 }
 .bg-home {
-    background: linear-gradient(180deg, var(--secondary), var(--text-secondary));
     height: 100dvh;
     padding: 8rem 0 8rem 0;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
 }
 
 .home-center {

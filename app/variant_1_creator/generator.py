@@ -39,7 +39,7 @@ async def build_site_from_parser(data: AppUrlData) -> str:
 
     # For random template dir
     template_dir = choose_random_template()
-    # template_dir = 'C:\\Users\\u1-1824\\Desktop\\Projects\\app\\variant_1_creator\\templates\\5'
+    # template_dir = "C:\\Users\\u1-1824\\Documents\\Projects\\Projects\\app\\variant_1_creator\\templates\\4"
 
     # Download images
     headers = {
@@ -126,6 +126,7 @@ async def build_site_from_parser(data: AppUrlData) -> str:
         "cookie_html": cookie_component,
         "badge": badge,
         "preview_img": preview_img,
+        "background_img": random.choice([preview_img, ""]),
         "address_html": address_html,
         "principles_html": principles_html,
         "terms_html": terms_html,
