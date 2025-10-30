@@ -69,16 +69,16 @@ async def build_app_site(
     """
     if not target_directory:
         target_directory = str(config.APP_DIR.parent / "dist")
-    
+
     if not os.path.isabs(target_directory):
         raise ValueError("target_directory has to be absolute path")
-    
+
     if not campaign_id:
         raise ValueError("campaign_id cannot be None or empty")
-    
+
     # Setting directories.
     config.set_dist_dir(target_directory)
-    
+
     full_string = f"{mode or ''}{generation_query or ''}{app_data or ''}{url or ''}"
     hashed_string = hashlib.md5(full_string.encode()).hexdigest()
 
@@ -91,10 +91,12 @@ async def build_app_site(
         basic_folder=config.BASIC_FOLDER,
     ) as bucket_client:
         bucket_cache, bucket_url = await bucket_client.check_bucket_cache(
-            destination=target_directory, campaign_id=campaign_id, hashed_string=hashed_string
+            destination=target_directory,
+            campaign_id=campaign_id,
+            hashed_string=hashed_string,
         )
         if bucket_cache and bucket_url:
-            return bucket_cache, bucket_url
+            return {"local_dist": bucket_cache, "cloud_url": bucket_url}
 
         match mode:
             case "app_data":
@@ -103,8 +105,12 @@ async def build_app_site(
                 directory = await build_from_app_data(app_data)
             case "to_generate_data":
                 if not generation_query:
-                    raise ValueError("In Generation mode you need to put generation query")
-                directory = await build_from_generated_data(generation_query, img_cx, img_api_token, llm_api_key)
+                    raise ValueError(
+                        "In Generation mode you need to put generation query"
+                    )
+                directory = await build_from_generated_data(
+                    generation_query, img_cx, img_api_token, llm_api_key
+                )
             case "url":
                 if not url:
                     raise ValueError("In URL mode you need to put url")
@@ -117,7 +123,7 @@ async def build_app_site(
         bucket_url = await bucket_client.upload_directory(
             origin=target_directory, prefix=f"{campaign_id}_{hashed_string}"
         )
-        return directory, bucket_url
+        return {"local_dist": directory, "cloud_url": bucket_url}
 
 
 if __name__ == "__main__":
@@ -129,8 +135,8 @@ if __name__ == "__main__":
         conf_data = json.load(f)
     # Abs path where to save DIR.
     target_directory = ""
-    
-    abs_path, bucket_url = asyncio.run(
+
+    result = asyncio.run(
         build_app_site(
             target_directory=target_directory,
             **conf_data,
@@ -141,4 +147,4 @@ if __name__ == "__main__":
             access_secret=os.getenv("ACCESS_SECRET"),
         )
     )
-    print(abs_path, bucket_url)
+    print(result)
