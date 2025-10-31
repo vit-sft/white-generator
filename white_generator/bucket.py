@@ -2,7 +2,7 @@ from aiobotocore.session import get_session
 import aiofiles
 import os
 import asyncio
-from .utils import build_directories
+from white_generator.utils import build_directories
 
 
 class AsyncS3Client:

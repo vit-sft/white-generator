@@ -1,4 +1,4 @@
-from app.core.config import config
+from white_generator.core.config import config
 from urllib.parse import urlencode
 from google import genai
 from google.genai import types
@@ -6,7 +6,7 @@ from google.api_core import exceptions as google_exceptions
 from aiohttp import ClientSession, client_exceptions, ClientError
 import random
 import asyncio
-from .schemas import AppUrlData
+from white_generator.variant_1_creator.schemas import AppUrlData
 
 
 class AppDataGenerator:

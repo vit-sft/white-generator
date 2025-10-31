@@ -1,5 +1,5 @@
 from aiohttp import ClientSession, client_exceptions
-from .helpers import identify_store, format_error_message
+from white_generator.variant_1_creator.helpers import identify_store, format_error_message
 
 
 async def fetch_html(session: ClientSession, url: str) -> str:
