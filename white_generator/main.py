@@ -2,53 +2,14 @@ import json
 import asyncio
 import hashlib
 import os
-from aiohttp import ClientSession
-from bs4 import BeautifulSoup
 from typing import Optional, Literal
-
-from white_generator.variant_1_creator.parser import get_parser
-from white_generator.variant_1_creator.builder import build_site_from_parser, build_site_from_data
-from white_generator.variant_1_creator.requests import fetch_html
-from white_generator.variant_1_creator.generator import AppDataGenerator
-from white_generator.variant_1_creator.schemas import AppData
 from white_generator.bucket import AsyncS3Client
 from white_generator.core.config import config
-
-
-async def build_from_app_data(app_data: dict) -> str:
-    """
-    Build a site using pre-existing application data.
-    """
-    if isinstance(app_data, dict):
-        app_data = AppData(**app_data)
-
-    return await build_site_from_data(app_data)
-
-
-async def build_from_generated_data(
-    generation_query: str, img_cx: str, img_api_token: str, llm_api_key: str
-) -> str:
-    """
-    Generate new data and build a site from it.
-    """
-    async with AppDataGenerator(
-        img_cx=img_cx, img_api_token=img_api_token, llm_api_key=llm_api_key
-    ) as data_generator:
-        data = await data_generator.generate_data(generation_query=generation_query)
-    return await build_site_from_parser(data)
-
-
-async def build_from_url(url: str) -> str:
-    """
-    Fetch HTML content from a URL and build a site from the parsed information.
-    """
-    async with ClientSession() as session:
-        html = await fetch_html(session, url)
-        parser = get_parser(url)
-        soup = BeautifulSoup(html, "html.parser")
-        data = parser(soup, url)
-
-        return await build_site_from_parser(data)
+from white_generator.variant_1_creator.builder import (
+    build_from_app_data,
+    build_from_url,
+    build_from_generated_data,
+)
 
 
 async def build_app_site(

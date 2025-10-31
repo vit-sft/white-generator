@@ -2,11 +2,12 @@ import os
 import asyncio
 import hashlib
 import base64
-from white_generator.core.config import config
 import random
+from bs4 import BeautifulSoup
 from aiohttp import ClientSession
-from white_generator.variant_1_creator.styles import get_random_style, get_font_face
+from white_generator.core.config import config
 from white_generator.utils import copy_all_files, build_directories, copy_file_async
+from white_generator.variant_1_creator.styles import get_random_style, get_font_face
 from white_generator.variant_1_creator.helpers import (
     identify_store,
     write_file,
@@ -18,8 +19,19 @@ from white_generator.variant_1_creator.helpers import (
     PRESETS_IMG_DIR,
 )
 from white_generator.variant_1_creator.adresses import get_random_adress
-from white_generator.variant_1_creator.footer import get_use_principles, get_terms, get_faq
-from white_generator.variant_1_creator.schemas import AppData, AppUrlData
+from white_generator.variant_1_creator.footer import (
+    get_use_principles,
+    get_terms,
+    get_faq,
+)
+from white_generator.variant_1_creator.schemas import (
+    AppData,
+    AppUrlData,
+    AppGeneratedData,
+)
+from white_generator.variant_1_creator.parser import get_parser
+from white_generator.variant_1_creator.requests import fetch_html
+from white_generator.variant_1_creator.generator import AppDataGenerator
 
 
 async def build_site_from_parser(data: AppUrlData) -> str:
@@ -254,3 +266,163 @@ async def build_site_from_data(data: AppData) -> str:
     )
 
     return os.path.abspath(config.DIST_DIR)
+
+
+async def build_site_from_generated(data: AppGeneratedData) -> str:
+    """
+    Builds a site from generated application data (icon in bytes + screenshot URLs)
+    into the DIST_DIR folder.
+    """
+
+    build_directories()
+
+    # Choose random template
+    template_dir = choose_random_template()
+
+    # Download screenshots
+    headers = {
+        "User-Agent": (
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+            "AppleWebKit/537.36 (KHTML, like Gecko) "
+            "Chrome/129.0.0.0 Safari/537.36"
+        ),
+    }
+
+    async with ClientSession(headers=headers) as session:
+        screenshot_tasks = [
+            download_image(session, url) for url in data.screenshot_urls
+        ]
+        screenshot_results = await asyncio.gather(*screenshot_tasks)
+
+    # Filter out failed downloads
+    screenshot_files = [path for path in screenshot_results if path]
+
+    # Save icon bytes
+    icon_dst = os.path.join(config.IMG_DIR, "icon.webp")
+    icon_path = await write_bytes_file(icon_dst, data.icon_data)
+
+    # Fallback icon if none
+    if not icon_path and screenshot_files:
+        icon_path = screenshot_files[0]
+
+    # Load template files
+    index_content, css_content, js_content, cookie_css_content = await load_files(
+        template_dir
+    )
+
+    # Build screenshots HTML
+    screenshots_html = "\n".join(
+        f'<div><img src="source_target_files/img/{os.path.basename(p)}" '
+        f'alt="Screenshot {i + 1}"></div>'
+        for i, p in enumerate(screenshot_files)
+    )
+
+    # Load and combine components
+    components_path = os.path.join(template_dir, "components")
+    component_files = os.listdir(components_path)
+    random.shuffle(component_files)
+
+    cookie_html_src = os.path.join(config.COOKIE_DIR, "cookie.html")
+    component_tasks = [
+        read_file(os.path.join(components_path, f)) for f in component_files
+    ] + [read_file(cookie_html_src)]
+
+    results = await asyncio.gather(*component_tasks)
+    *components, cookie_component = results
+    components_html = "".join(components)
+
+    # Random extra elements
+    address_html = get_random_adress()
+    principles_html = get_use_principles()
+    terms_html = get_terms()
+    faq_html = get_faq()
+
+    # Random design
+    styles = get_random_style()
+    chosen_font, font_dir = styles["font"]
+    root_element = styles["root_element"]
+    font_face = get_font_face(chosen_font, font_dir)
+
+    # Prepare context
+    context = {
+        "title": data.title,
+        "description_html": data.description,
+        "app_url": data.app_url,
+        "logo_path": f"source_target_files/img/{os.path.basename(icon_path)}"
+        if icon_path
+        else "",
+        "components_html": components_html,
+        "cookie_html": cookie_component,
+        "badge": "badge-download.png",
+        "preview_img": os.path.basename(screenshot_files[0])
+        if screenshot_files
+        else "",
+        "background_img": random.choice([os.path.basename(screenshot_files[0]), ""])
+        if screenshot_files
+        else "",
+        "screenshots_html": screenshots_html,
+        "address_html": address_html,
+        "principles_html": principles_html,
+        "terms_html": terms_html,
+        "faq_html": faq_html,
+    }
+
+    # Render templates
+    index_content = index_content.format(**context)
+    index_content = index_content.format(**context)
+    css_content = "\n".join([root_element, font_face, css_content, cookie_css_content])
+
+    # Define output paths
+    index_path = os.path.join(config.DIST_DIR, "source_target.html")
+    css_path = os.path.join(config.CSS_DIR, "style.css")
+    js_path = os.path.join(config.JS_DIR, "main.js")
+    fonts_path = os.path.join(config.FONTS_DIR, chosen_font)
+    cookie_js_src = os.path.join(config.COOKIE_DIR, "cookie.js")
+
+    # Write all files asynchronously
+    await asyncio.gather(
+        write_file(index_path, index_content),
+        write_file(css_path, css_content),
+        write_file(js_path, js_content),
+        copy_file_async(cookie_js_src, config.JS_DIR),
+        copy_all_files(font_dir, fonts_path),
+        copy_all_files(PRESETS_IMG_DIR, config.IMG_DIR),
+    )
+
+    return os.path.abspath(config.DIST_DIR)
+
+
+async def build_from_app_data(app_data: dict) -> str:
+    """
+    Build a site using pre-existing application data.
+    """
+    if isinstance(app_data, dict):
+        app_data = AppData(**app_data)
+
+    return await build_site_from_data(app_data)
+
+
+async def build_from_generated_data(
+    generation_query: str, img_cx: str, img_api_token: str, llm_api_key: str
+) -> str:
+    """
+    Generate new data and build a site from it.
+    """
+    async with AppDataGenerator(
+        img_cx=img_cx, img_api_token=img_api_token, llm_api_key=llm_api_key
+    ) as data_generator:
+        data = await data_generator.generate_data(generation_query=generation_query)
+    return await build_site_from_generated(data)
+
+
+async def build_from_url(url: str) -> str:
+    """
+    Fetch HTML content from a URL and build a site from the parsed information.
+    """
+    async with ClientSession() as session:
+        html = await fetch_html(session, url)
+        parser = get_parser(url)
+        soup = BeautifulSoup(html, "html.parser")
+        data = parser(soup, url)
+
+        return await build_site_from_parser(data)

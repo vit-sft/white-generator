@@ -8,17 +8,32 @@ from white_generator.utils import build_directories
 class AsyncS3Client:
     """
     Async client for AWS S3 bucket operations.
-    Provides asynchronous methods to list, upload, download, and delete files or directories
-    in an S3 bucket. Has to be used within an `async with` block to properly create and close S3 session.
+    
+    Provides async methods to interact with an S3 bucket — such as listing, uploading,
+    downloading, and deleting files or directories.
+
+    Usage:
+        async with AsyncS3Client(bucket_name="my-bucket", basic_folder="data/") as s3:
+            dirs = await s3.list_directories()
     """
     def __init__(
         self,
+        aws_access_key_id,
+        aws_secret_access_key,
+        bucket_name,
         region_name="eu-north-1",
-        aws_access_key_id=None,
-        aws_secret_access_key=None,
-        bucket_name=None,
-        basic_folder=None,
+        basic_folder="",
     ):
+        """
+        Initialize the AsyncS3Client.
+
+        Args:
+            aws_access_key_id (str): AWS access key ID.
+            aws_secret_access_key (str): AWS secret access key.
+            bucket_name (str): Name of the S3 bucket.
+            region_name (str, optional): AWS region name. Defaults to "eu-north-1".
+            basic_folder (str, optional): Base folder path within the bucket.
+        """
         self.region_name = region_name
         self.aws_access_key_id = aws_access_key_id
         self.aws_secret_access_key = aws_secret_access_key
@@ -28,16 +43,16 @@ class AsyncS3Client:
         self._client = None
 
     async def __aenter__(self):
-        # Create S3 client when entering async context
+        """Enter the async context and create the S3 client."""
         self._client = await self._create_client()
         return self
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):
-        # Close S3 client when exiting async context
+        """Exit the async context and close the S3 client connection."""
         await self._client.close()
 
     async def _create_client(self):
-        # Initialize S3 async client
+        """Create and return an aiobotocore S3 client."""
         return await self._session.create_client(
             "s3",
             region_name=self.region_name,
@@ -87,7 +102,7 @@ class AsyncS3Client:
         return base_url
 
     async def delete_directory(self, prefix: str) -> None:
-        """Delete all S3 objects under directory."""
+        """Delete all S3 objects under prefix."""
         if not prefix:
             return
 

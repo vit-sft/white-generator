@@ -15,7 +15,8 @@ class AppConfig:
         self.FONTS_DIR = None
 
         # Static settings
-        self.LLM_MODEL = "gemini-2.5-flash-lite"
+        self.LLM_TEXT_MODEL = "gemini-2.5-flash-lite"
+        self.LLM_IMAGE_MODEL = "gemini-2.0-flash-preview-image-generation"
         self.BUCKET_NAME = "mtoffer-club"
         self.AWS_REGION = "eu-north-1"
         self.BASIC_FOLDER = "public/cached-whites/"
