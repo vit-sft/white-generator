@@ -11,11 +11,27 @@ from white_generator.variant_1_creator.schemas import AppUrlData
 
 class AppDataGenerator:
     """
-    Async client for app data generation. 
-    Has to be in async with statement. 
+    Async client for app data generation from a query(app name). 
+    It must be used within an async context manager ("async with") to properly manage the internal aiohttp session.
+    
+    Example:
+        async with AppDataGenerator(img_cx, img_api_token, llm_api_key) as data_generator:
+            app_data = await generator.generate_data("FireJocker")
+            print(app_data.description)
+            
+    Uses Google's Search Engine ID and Custom Search JSON API to fetch images from internet.
+    Uses Google's Gemini API to create description to an app via genai client.
     """
 
     def __init__(self, img_cx: str, img_api_token: str, llm_api_key: str):
+        """
+        Initializing the AppData generator.
+        
+        Args:
+            img_cx (str): Google Programmable Search Engine ID.
+            img_api_token (str): Google Custom Search JSON API key.
+            llm_api_key (str): Google Gemini API key.
+        """
         self.img_cx = img_cx
         self.img_api_token = img_api_token
         self.llm_api_key = llm_api_key
@@ -23,16 +39,28 @@ class AppDataGenerator:
         self._llm_client = genai.Client(api_key=self.llm_api_key)
 
     async def __aenter__(self):
+        """
+        Creating aiohttp session on entering
+        """
         self._session = ClientSession()
         return self
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):
+        """
+        Closing aiohttp session on exiting
+        """
         if self._session:
             await self._session.close()
 
-    async def get_images_query(self, query: str, quantity: int):
-        """
-        Fetches image URLs from Google Search.
+    async def _get_images_query(self, query: str, quantity: int):
+        """Fetches image URLs from Google Custom Search API.
+        
+        Args:
+            query (str): Search term.
+            quantity (int): Number of image results to return.
+            
+        Returns:
+            str: Quantity of images from a search query.
         """
 
         headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}
@@ -80,7 +108,16 @@ class AppDataGenerator:
                 f"An unexpected error occurred while fetching '{url}': {str(e)}"
             )
 
-    async def generate_app_desc(self, app_name):
+    async def _generate_app_desc(self, app_name):
+        """
+        Generates an app store description using Google's Gemini API.
+
+        Args:
+            app_name (str): The name of the app.
+
+        Returns:
+            str: An HTML-formatted app description.
+        """
         model = config.LLM_MODEL
         promt = f"Write a short, engaging app store description for an app called '{app_name}'."
         contents = [
@@ -158,7 +195,20 @@ class AppDataGenerator:
 
     async def generate_data(self, generation_query: str) -> AppUrlData:
         """
-        Generating data from an image API and LLM API
+        Generate complete app data: icon, screenshots, and description.
+
+        This method fetches an app icon, screenshots, and description concurrently.
+
+        Args:
+            generation_query (str): App name or search term.
+
+        Returns:
+            AppUrlData:
+                title (str)
+                description (str)
+                icon_url (str)
+                screenshot_urls (list[str])
+                app_url (str)
         """
         icon_query = generation_query + " square logo"
         screenshots_query = generation_query + " slots play"
