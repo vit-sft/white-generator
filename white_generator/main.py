@@ -5,13 +5,14 @@ import os
 from aiohttp import ClientSession
 from bs4 import BeautifulSoup
 from typing import Optional, Literal
-from .variant_1_creator.parser import get_parser
-from .variant_1_creator.builder import build_site_from_parser, build_site_from_data
-from .variant_1_creator.requests import fetch_html
-from .variant_1_creator.generator import AppDataGenerator
-from .variant_1_creator.schemas import AppData
-from .bucket import AsyncS3Client
-from app.core.config import config
+
+from white_generator.variant_1_creator.parser import get_parser
+from white_generator.variant_1_creator.builder import build_site_from_parser, build_site_from_data
+from white_generator.variant_1_creator.requests import fetch_html
+from white_generator.variant_1_creator.generator import AppDataGenerator
+from white_generator.variant_1_creator.schemas import AppData
+from white_generator.bucket import AsyncS3Client
+from white_generator.core.config import config
 
 
 async def build_from_app_data(app_data: dict) -> str:
@@ -131,7 +132,7 @@ if __name__ == "__main__":
 
     load_dotenv()
 
-    with open("app/core/test.json", "r") as f:
+    with open("test.json", "r") as f:
         conf_data = json.load(f)
     # Abs path where to save DIR.
     target_directory = ""

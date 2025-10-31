@@ -1,7 +1,7 @@
 import asyncio
 import shutil
 import os
-from app.core.config import config
+from white_generator.core.config import config
 
 async def copy_file_async(src, dst):
     await asyncio.to_thread(shutil.copy2, src, dst)

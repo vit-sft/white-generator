@@ -1,6 +1,6 @@
 from bs4 import BeautifulSoup
-from .helpers import identify_store
-from .schemas import AppUrlData
+from white_generator.variant_1_creator.helpers import identify_store
+from white_generator.variant_1_creator.schemas import AppUrlData
 
 
 def get_parser(url: str):

@@ -2,7 +2,7 @@ import os
 from urllib.parse import urlparse
 import aiofiles
 from aiohttp import ClientSession, client_exceptions
-from app.core.config import config
+from white_generator.core.config import config
 import asyncio
 import hashlib
 import random

@@ -2,12 +2,12 @@ import os
 import asyncio
 import hashlib
 import base64
-from app.core.config import config
+from white_generator.core.config import config
 import random
 from aiohttp import ClientSession
-from .styles import get_random_style, get_font_face
-from app.utils import copy_all_files, build_directories, copy_file_async
-from .helpers import (
+from white_generator.variant_1_creator.styles import get_random_style, get_font_face
+from white_generator.utils import copy_all_files, build_directories, copy_file_async
+from white_generator.variant_1_creator.helpers import (
     identify_store,
     write_file,
     write_bytes_file,
@@ -17,9 +17,9 @@ from .helpers import (
     choose_random_template,
     PRESETS_IMG_DIR,
 )
-from .adresses import get_random_adress
-from .footer import get_use_principles, get_terms, get_faq
-from .schemas import AppData, AppUrlData
+from white_generator.variant_1_creator.adresses import get_random_adress
+from white_generator.variant_1_creator.footer import get_use_principles, get_terms, get_faq
+from white_generator.variant_1_creator.schemas import AppData, AppUrlData
 
 
 async def build_site_from_parser(data: AppUrlData) -> str:
