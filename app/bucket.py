@@ -7,8 +7,9 @@ from .utils import build_directories
 
 class AsyncS3Client:
     """
-    Async client for AWS S3 Bucket operations (list, upload, download, delete).
-    Has to be in async with statement.
+    Async client for AWS S3 bucket operations.
+    Provides asynchronous methods to list, upload, download, and delete files or directories
+    in an S3 bucket. Has to be used within an `async with` block to properly create and close S3 session.
     """
     def __init__(
         self,
