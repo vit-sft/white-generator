@@ -1,0 +1,3 @@
+
+recursive-include white_generator/variant_1_creator/presets *
+recursive-include white_generator/variant_1_creator/templates *
