@@ -213,11 +213,11 @@ class AppDataGenerator:
         icon_query = generation_query + " square logo"
         screenshots_query = generation_query + " slots play"
 
-        icon_task = asyncio.create_task(self.get_images_query(icon_query, 1))
+        icon_task = asyncio.create_task(self._get_images_query(icon_query, 1))
         screenshots_task = asyncio.create_task(
-            self.get_images_query(screenshots_query, random.randint(4, 8))
+            self._get_images_query(screenshots_query, random.randint(4, 8))
         )
-        desc_task = asyncio.create_task(self.generate_app_desc(generation_query))
+        desc_task = asyncio.create_task(self._generate_app_desc(generation_query))
 
         icon_url, screenshot_urls, description = await asyncio.gather(
             icon_task, screenshots_task, desc_task
