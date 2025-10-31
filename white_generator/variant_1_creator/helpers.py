@@ -1,7 +1,7 @@
 import os
 from urllib.parse import urlparse
 import aiofiles
-from aiohttp import ClientSession, client_exceptions
+from aiohttp import ClientSession
 from white_generator.core.config import config
 import asyncio
 import hashlib
@@ -93,7 +93,7 @@ async def download_image(session: ClientSession, url: str, filename=None) -> str
     dst = os.path.join(config.IMG_DIR, filename)
     try:
         async with session.get(url) as resp:
-            if resp.status == 200:
+            if resp.status == 200 and "image" in resp.headers.get("Content-Type", ""):
                 async with aiofiles.open(dst, "wb") as f:
                     await f.write(await resp.read())
             else:
