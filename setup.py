@@ -6,6 +6,7 @@ with open("requirements.txt") as f:
 setup(
     name="white_generator",
     version="0.1.0",
+    include_package_data=True,
     packages=find_packages(), 
     install_requires=requirements
 )

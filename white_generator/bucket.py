@@ -2,6 +2,7 @@ from aiobotocore.session import get_session
 import aiofiles
 import os
 import asyncio
+import mimetypes
 from white_generator.utils import build_directories
 
 
@@ -105,10 +106,12 @@ class AsyncS3Client:
                 local_path = os.path.join(root, filename)
                 relative_path = os.path.relpath(local_path, start=origin)
                 key = f"{self.basic_folder}{prefix}/{relative_path}".replace("\\", "/")
-                tasks.append(self.upload_file(local_path=local_path, key=key))
-
-        await asyncio.gather(*tasks)
-
+                content_type, _ = mimetypes.guess_type(local_path)
+                async with aiofiles.open(local_path, "rb") as f:
+                    body = await f.read()
+                    await self._client.put_object(
+                        Bucket=self.bucket_name, Key=key, Body=body, ContentType=content_type
+                    )
         return base_url
 
     async def delete_directory(self, prefix: str) -> None:
