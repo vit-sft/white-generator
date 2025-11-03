@@ -83,13 +83,13 @@ class AsyncS3Client:
         return object_keys
 
 
-    async def upload_file(self, local_path: str, key: str):
+    async def upload_file(self, local_path: str, key: str, content_type):
         """Upload file in a from relative path ot key directory in Bucket"""
         
         async with aiofiles.open(local_path, "rb") as f:
             body = await f.read()
             await self._client.put_object(
-                Bucket=self.bucket_name, Key=key, Body=body
+                Bucket=self.bucket_name, Key=key, Body=body, ContentType=content_type
             )
             
     async def upload_directory(self, origin: str, prefix: str):
@@ -107,11 +107,9 @@ class AsyncS3Client:
                 relative_path = os.path.relpath(local_path, start=origin)
                 key = f"{self.basic_folder}{prefix}/{relative_path}".replace("\\", "/")
                 content_type, _ = mimetypes.guess_type(local_path)
-                async with aiofiles.open(local_path, "rb") as f:
-                    body = await f.read()
-                    await self._client.put_object(
-                        Bucket=self.bucket_name, Key=key, Body=body, ContentType=content_type
-                    )
+                tasks.append(self.upload_file(local_path=local_path, key=key, content_type=content_type))
+                
+        await asyncio.gather(*tasks)
         return base_url
 
     async def delete_directory(self, prefix: str) -> None:
