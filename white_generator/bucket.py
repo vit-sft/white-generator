@@ -81,6 +81,16 @@ class AsyncS3Client:
         object_keys = [obj["Key"] for obj in resp.get("Contents", [])]
         return object_keys
 
+
+    async def upload_file(self, local_path: str, key: str):
+        """Upload file in a from relative path ot key directory in Bucket"""
+        
+        async with aiofiles.open(local_path, "rb") as f:
+            body = await f.read()
+            await self._client.put_object(
+                Bucket=self.bucket_name, Key=key, Body=body
+            )
+            
     async def upload_directory(self, origin: str, prefix: str):
         """Recursively upload all files in a origin directory to Bucket"""
         
@@ -88,17 +98,17 @@ class AsyncS3Client:
         key_prefix = f"{self.basic_folder}{prefix}".rstrip("/")
         base_url = f"https://{self.bucket_name}.s3.{self.region_name}.amazonaws.com/{key_prefix}/source_target.html"
         
+        tasks = []
+        
         for root, _, files in os.walk(origin):
             for filename in files:
                 local_path = os.path.join(root, filename)
                 relative_path = os.path.relpath(local_path, start=origin)
                 key = f"{self.basic_folder}{prefix}/{relative_path}".replace("\\", "/")
+                tasks.append(self.upload_file(local_path=local_path, key=key))
 
-                async with aiofiles.open(local_path, "rb") as f:
-                    body = await f.read()
-                    await self._client.put_object(
-                        Bucket=self.bucket_name, Key=key, Body=body
-                    )
+        await asyncio.gather(*tasks)
+
         return base_url
 
     async def delete_directory(self, prefix: str) -> None:

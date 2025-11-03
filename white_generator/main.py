@@ -5,11 +5,7 @@ import os
 from typing import Optional, Literal
 from white_generator.bucket import AsyncS3Client
 from white_generator.core.config import config
-from white_generator.variant_1_creator.builder import (
-    build_from_app_data,
-    build_from_url,
-    build_from_generated_data,
-)
+from white_generator.variant_1_creator.builder import AppBuilder
 
 
 async def build_app_site(
@@ -24,6 +20,7 @@ async def build_app_site(
     llm_api_key: str = None,
     access_key: str = None,
     access_secret: str = None,
+    template_number: int = None,
 ) -> str:
     """
     Build app site based on the given mode and install from/upload it to S3.
@@ -38,6 +35,9 @@ async def build_app_site(
     if not campaign_id:
         raise ValueError("campaign_id cannot be None or empty")
 
+    if template_number and template_number not in range(1, 6):
+        raise ValueError("template_number has to be inside 1 to 5 range")
+    
     # Setting directories.
     config.set_dist_dir(target_directory)
 
@@ -59,24 +59,27 @@ async def build_app_site(
         )
         if bucket_cache and bucket_url:
             return {"local_dist": bucket_cache, "cloud_url": bucket_url}
-
+        
+        #Getting builder
+        builder = AppBuilder(template_number)
+        
         match mode:
             case "app_data":
                 if not app_data:
                     raise ValueError("In Data mode you need to put data")
-                directory = await build_from_app_data(app_data)
+                directory = await builder.build_from_app_data(app_data)
             case "to_generate_data":
                 if not generation_query:
                     raise ValueError(
                         "In Generation mode you need to put generation query"
                     )
-                directory = await build_from_generated_data(
+                directory = await builder.build_from_generated_data(
                     generation_query, img_cx, img_api_token, llm_api_key
                 )
             case "url":
                 if not url:
                     raise ValueError("In URL mode you need to put url")
-                directory = await build_from_url(url)
+                directory = await builder.build_from_url(url)
             case _:
                 raise ValueError(f"Invalid build mode: {mode}")
 
@@ -90,16 +93,24 @@ async def build_app_site(
 
 if __name__ == "__main__":
     from dotenv import load_dotenv
-
     load_dotenv()
 
     with open("test.json", "r") as f:
         conf_data = json.load(f)
-    # Abs path where to save DIR.
-    target_directory = ""
+        
+    with open("test copy.json", "r") as f:
+        conf_data1 = json.load(f)
 
-    result = asyncio.run(
-        build_app_site(
+    with open("test copy 2.json", "r") as f:
+        conf_data2 = json.load(f)
+
+    # Output directories
+    target_directory = ""
+    target_directory1 = ""
+    target_directory2 = ""
+
+    async def runner():
+        result = await build_app_site(
             target_directory=target_directory,
             **conf_data,
             img_cx=os.getenv("IMG_CX"),
@@ -107,6 +118,29 @@ if __name__ == "__main__":
             llm_api_key=os.getenv("LLM_API_KEY"),
             access_key=os.getenv("ACCESS_KEY"),
             access_secret=os.getenv("ACCESS_SECRET"),
+            template_number=5
         )
-    )
-    print(result)
+
+        result1 = await build_app_site(
+            target_directory=target_directory1,
+            **conf_data1,
+            img_cx=os.getenv("IMG_CX"),
+            img_api_token=os.getenv("IMG_API_TOKEN"),
+            llm_api_key=os.getenv("LLM_API_KEY"),
+            access_key=os.getenv("ACCESS_KEY"),
+            access_secret=os.getenv("ACCESS_SECRET"),
+        )
+
+        result2 = await build_app_site(
+            target_directory=target_directory2,
+            **conf_data2,
+            img_cx=os.getenv("IMG_CX"),
+            img_api_token=os.getenv("IMG_API_TOKEN"),
+            llm_api_key=os.getenv("LLM_API_KEY"),
+            access_key=os.getenv("ACCESS_KEY"),
+            access_secret=os.getenv("ACCESS_SECRET"),
+        )
+
+        print(result, result1, result2)
+
+    asyncio.run(runner())
