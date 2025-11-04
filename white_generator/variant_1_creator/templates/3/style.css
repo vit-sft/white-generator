@@ -100,6 +100,41 @@ html {
     min-width: 300px;
 }
 
+.description-block p {
+  overflow: hidden;
+  transition: max-height 0.5s ease;
+  position: relative;
+}
+
+.description-block.collapsed p {
+  max-height: 50dvh;
+}
+
+.description-block.collapsed p::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 3rem;
+  background: linear-gradient(to top, var(--background), rgba(255, 255, 255, 0));
+}
+
+.description-block .read-more {
+  display: block;
+  margin-top: 5px;
+  font-size: 14px;
+  color: #888;
+  cursor: pointer;
+  text-align: center;
+  user-select: none;
+  transition: color 0.2s ease;
+}
+
+.description-block .read-more:hover {
+  color: #555;
+}
+
 .download-section {
     flex: 0 1 30%;
     min-width: 300px;
@@ -109,6 +144,23 @@ html {
     border-radius: 16px; 
     box-shadow: 4px 4px 20px rgb(49 49 49 / 16%); 
     margin: auto;
+    transform-origin: bottom center; /* pivot around bottom edge */
+    animation: jumpHeel 1.5s ease-in-out infinite;
+}
+
+@keyframes jumpHeel {
+  0%, 100% {
+    transform: translateY(0) rotateX(0deg);
+  }
+  30% {
+    transform: translateY(-15px) rotateX(0deg); /* jumping up, flat */
+  }
+  60% {
+    transform: translateY(0) rotateX(25deg); /* heel down landing */
+  }
+  80% {
+    transform: translateY(0) rotateX(0deg); /* recover */
+  }
 }
 
 .purchases-title {
@@ -147,30 +199,83 @@ html {
 }
 
 .gallery-section {
-    margin-bottom: 3rem;
+    width: 100%;
+    max-width: 800px;
+    margin: auto;
+    overflow: hidden;
+    position: relative;
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .gallery-container {
+    position: relative;
+    width: 100%;
+    max-height: 400px;
+}
+
+
+.gallery-container::before {
+    content: "";
+    display: block;
+    padding-top: 56.25%;
+}
+
+.gallery-container>div {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    transition: opacity 1s ease-in-out;
+}
+
+.gallery-container>div.active {
+    opacity: 1;
+}
+
+.gallery-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+}
+
+/* Thumbnails */
+.thumbnails {
     display: flex;
     flex-wrap: wrap;
-    gap: 1rem; 
     justify-content: center;
+    gap: 6px;
+    margin-top: 10px;
+    padding-bottom: 10px;
 }
 
-.gallery-container div {
-    max-width: 300px;
-    width: 100%;
-    height: auto;
-    border-radius: 8px; 
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    display: flex;
-    justify-content: center;
-
+.thumbnails>div {
+    cursor: pointer;
+    border-radius: 6px;
+    overflow: hidden;
+    opacity: 0.6;
+    transition: transform 0.3s, opacity 0.3s, box-shadow 0.3s;
 }
-.gallery-container div img {
-    width: 100%;
-    aspect-ratio: 16 / 9;
-    object-fit: contain;
+
+.thumbnails>div.active {
+    opacity: 1;
+    transform: scale(1.05);
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.4);
+}
+
+.thumbnails>div:hover {
+    opacity: 1;
+}
+
+.thumbnails img {
+    width: 80px;
+    height: 45px;
+    /* 16:9 */
+    object-fit: cover;
+    display: block;
 }
 
 .footer {

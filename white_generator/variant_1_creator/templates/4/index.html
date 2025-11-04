@@ -54,7 +54,10 @@
                 <div class="home-visual-block">
                     <div class="phone-wrap">
                         <img class="phone-bg" src="source_target_files/img/phone-bg.png" alt="">
-                        <img class="phone-content" src="source_target_files/img/{preview_img}" alt="">
+                        <div class="phone-content-wrapper">
+                        <img class="phone-content current" src="source_target_files/img/{preview_img}" alt="">
+                            <img class="phone-content next" src="" alt="">
+                        </div>
                     </div>
                 </div>
             </div>
@@ -83,9 +86,7 @@
             </div>
             <h3>Contact</h3>
             <div class="content">
-                <p>Our address:<br>
-                    123 Casino Street, Suite 100,<br>
-                    Las Vegas, NV 89109, USA</p>
+                <p>{address_html}</p>
             </div>
             <h3>Responsible Use</h3>
             <div class="content">

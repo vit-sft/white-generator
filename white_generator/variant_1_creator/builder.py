@@ -223,7 +223,11 @@ class AppBuilder:
             "cookie_html": cookie_component,
             "badge": badge,
             "preview_img": preview_img,
-            "background_img": random.choice([preview_img, ""]),
+            "background_img": random.choices(
+                [preview_img, ""],
+                weights=[0.75, 0.25],
+                k=1,
+            )[0],
             "address_html": address_html,
             "principles_html": principles_html,
             "terms_html": terms_html,

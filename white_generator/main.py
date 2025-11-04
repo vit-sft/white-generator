@@ -112,35 +112,15 @@ if __name__ == "__main__":
     async def runner():
         result = await build_app_site(
             target_directory=target_directory,
-            **conf_data,
-            img_cx=os.getenv("IMG_CX"),
-            img_api_token=os.getenv("IMG_API_TOKEN"),
-            llm_api_key=os.getenv("LLM_API_KEY"),
-            access_key=os.getenv("ACCESS_KEY"),
-            access_secret=os.getenv("ACCESS_SECRET"),
-            template_number=5
-        )
-
-        result1 = await build_app_site(
-            target_directory=target_directory1,
             **conf_data1,
             img_cx=os.getenv("IMG_CX"),
             img_api_token=os.getenv("IMG_API_TOKEN"),
             llm_api_key=os.getenv("LLM_API_KEY"),
             access_key=os.getenv("ACCESS_KEY"),
             access_secret=os.getenv("ACCESS_SECRET"),
+            template_number=1
         )
 
-        result2 = await build_app_site(
-            target_directory=target_directory2,
-            **conf_data2,
-            img_cx=os.getenv("IMG_CX"),
-            img_api_token=os.getenv("IMG_API_TOKEN"),
-            llm_api_key=os.getenv("LLM_API_KEY"),
-            access_key=os.getenv("ACCESS_KEY"),
-            access_secret=os.getenv("ACCESS_SECRET"),
-        )
-
-        print(result, result1, result2)
+        print(result)
 
     asyncio.run(runner())
