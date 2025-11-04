@@ -146,6 +146,11 @@ html {
     margin: auto;
     transform-origin: bottom center; /* pivot around bottom edge */
     animation: jumpHeel 1.5s ease-in-out infinite;
+    padding: 1rem;
+    text-align: center;
+    overflow-wrap: anywhere; /* modern, replaces word-wrap */
+    word-break: normal;      /* don't break words unless needed */
+    line-break: auto;        /* handle Asian text properly if present */
 }
 
 @keyframes jumpHeel {
