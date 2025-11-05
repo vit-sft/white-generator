@@ -190,7 +190,7 @@ ease-in-out;
   position: absolute;
   width: 100%;
   height: 100%;
-  object-fit: contain;
+  object-fit: cover;
   top: 0;
   left: 0;
   transition: opacity 0.3s ease-in-out;
