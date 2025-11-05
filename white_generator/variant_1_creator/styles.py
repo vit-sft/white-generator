@@ -107,3 +107,49 @@ def get_font_face(chosen_font, font_dir):
 
     full_css = "\n\n".join(css_blocks)
     return full_css
+
+
+def spin_wheel_colors():
+    """
+    Returns str with list of a random number of colors for wheel fidget
+    """
+    colors = [
+        "hsl(0, 80%, 55%)",
+        "hsl(20, 80%, 55%)",
+        "hsl(40, 80%, 55%)",
+        "hsl(60, 80%, 55%)",
+        "hsl(80, 80%, 55%)",
+        "hsl(100, 80%, 55%)",
+        "hsl(120, 80%, 55%)",
+        "hsl(140, 80%, 55%)",
+        "hsl(160, 80%, 55%)",
+        "hsl(180, 80%, 55%)",
+        "hsl(200, 80%, 55%)",
+        "hsl(220, 80%, 55%)",
+        "hsl(240, 80%, 55%)",
+        "hsl(260, 80%, 55%)",
+        "hsl(280, 80%, 55%)",
+        "hsl(300, 80%, 55%)",
+        "hsl(320, 80%, 55%)",
+        "hsl(340, 80%, 55%)",
+    ]
+    
+    count = random.randint(6, len(colors))
+    colors_sample = random.sample(colors, k=count)
+
+    return str(colors_sample)
+
+
+def generate_slot_reels():
+    symbols = [
+        "🍒", "🍋", "🍇", "🍊", "🔔", "⭐", "💎",
+        "🍉", "🍍", "🥝", "🍌", "🍓", "🍈", "💰",
+        "🎰", "🍀", "👑", "🎲", "💎", "🍑"
+    ]
+    
+    num_reels = random.randint(3, 5)
+    
+    symbols_count = random.randint(6, 9)
+    symbols_sample = random.sample(symbols, symbols_count)
+    
+    return num_reels, symbols_sample

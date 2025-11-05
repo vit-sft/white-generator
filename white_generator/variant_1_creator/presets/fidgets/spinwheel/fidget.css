@@ -1,0 +1,8 @@
+canvas {
+    cursor: pointer;
+    border-radius: 50%;
+    background: radial-gradient(circle at center, #222 0%, #111 100%);
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    touch-action: manipulation;
+}

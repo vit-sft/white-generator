@@ -16,6 +16,7 @@ from white_generator.variant_1_creator.helpers import (
     load_files,
     download_image,
     choose_random_template,
+    choose_random_fidget_with_params,
     PRESETS_IMG_DIR,
     TEMPLATES_DIR,
 )
@@ -160,9 +161,12 @@ class AppBuilder:
         if not icon_path and screenshot_files:
             icon_path = screenshot_files[0]
 
+        # Choosing fidget and getting parameters for it
+        fidget_path, params = choose_random_fidget_with_params()
+        
         # Load template files
-        index_content, css_content, js_content, cookie_css_content = await load_files(
-            self._template_dir
+        index_content, css_content, js_content, cookie_css_content, fidget_css_content = await load_files(
+            self._template_dir, fidget_path
         )
 
         # Build screenshots HTML
@@ -175,13 +179,17 @@ class AppBuilder:
         components_path = os.path.join(self._template_dir, "components")
         component_files = os.listdir(components_path)
         random.shuffle(component_files)
-
+        # Cookie html
         cookie_html_src = os.path.join(config.COOKIE_DIR, "cookie.html")
+
+        # Fidget html
+        fidget_html_src = os.path.join(fidget_path, "fidget.html")
+        
         component_tasks = [
             read_file(os.path.join(components_path, f)) for f in component_files
-        ] + [read_file(cookie_html_src)]
+        ] + [read_file(cookie_html_src)] + [read_file(fidget_html_src)]
         results = await asyncio.gather(*component_tasks)
-        *components, cookie_component = results
+        *components, cookie_component, fidget_component = results
 
         components_html = "".join(components)
 
@@ -220,6 +228,7 @@ class AppBuilder:
             "logo_path": logo_path,
             "components_html": components_html,
             "screenshots_html": screenshots_html,
+            "fidget_html": fidget_component,
             "cookie_html": cookie_component,
             "badge": badge,
             "preview_img": preview_img,
@@ -232,17 +241,20 @@ class AppBuilder:
             "principles_html": principles_html,
             "terms_html": terms_html,
             "faq_html": faq_html,
+            **params
         }
-
+        
         # Render HTML
         index_content = index_content.format(**context)
         index_content = index_content.format(**context)
-
+        index_content = index_content.format(**context)
+        
         css_content = "\n".join(
-            [root_element, font_face, css_content, cookie_css_content]
+            [root_element, font_face, css_content, cookie_css_content, fidget_css_content]
         )
 
         cookie_js_src = os.path.join(config.COOKIE_DIR, "cookie.js")
+        fidget_js_src = os.path.join(fidget_path, "fidget.js")
 
         index_path = os.path.join(config.DIST_DIR, "source_target.html")
         css_path = os.path.join(config.CSS_DIR, "style.css")
@@ -254,6 +266,7 @@ class AppBuilder:
             write_file(css_path, css_content),
             write_file(js_path, js_content),
             copy_file_async(cookie_js_src, config.JS_DIR),
+            copy_file_async(fidget_js_src, config.JS_DIR),
             copy_all_files(font_dir, fonts_path),
             copy_all_files(PRESETS_IMG_DIR, config.IMG_DIR),
         )

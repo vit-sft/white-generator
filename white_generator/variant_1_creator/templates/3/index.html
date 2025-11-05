@@ -16,7 +16,7 @@
     color-mix(in srgb, var(--text-secondary) 100%, transparent)),
     url(source_target_files/img/{background_img});">
         <header class="nav-bar">
-            <a href="{app_url}" class="nav-title">{title}</a>
+            <a href="{app_url}" id="title" class="nav-title">{title}</a>
             <nav class="nav-menu">
                 <a href="#about" class="nav-title">About</a>
                 <a href="#screenshots" class="nav-title">Screenshots</a>
@@ -26,6 +26,7 @@
         <div class="hero-section">
             <h1 class="hero-title">{title}</h1>
             <p class="hero-subtitle">Next-level experience</p>
+            {fidget_html}
             <a href="{app_url}" class="hero-button">Download</a>
         </div>
     </div>

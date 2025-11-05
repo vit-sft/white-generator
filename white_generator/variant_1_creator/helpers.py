@@ -3,6 +3,7 @@ from urllib.parse import urlparse
 import aiofiles
 from aiohttp import ClientSession
 from white_generator.core.config import config
+from white_generator.variant_1_creator.styles import generate_slot_reels, spin_wheel_colors
 import asyncio
 import hashlib
 import random
@@ -52,7 +53,7 @@ async def write_bytes_file(path: str, content: bytes) -> str:
         return f.name
 
 
-async def load_files(template_dir: str) -> tuple[str, str, str, str]:
+async def load_files(template_dir: str, fidget_dir: str) -> tuple[str, str, str, str, str]:
     """
     Function for readings files in async from random template's folder
     """
@@ -60,15 +61,17 @@ async def load_files(template_dir: str) -> tuple[str, str, str, str]:
     css_path = os.path.join(template_dir, "style.css")
     js_path = os.path.join(template_dir, "main.js")
     cookie_css_src = os.path.join(config.COOKIE_DIR, "cookie.css")
-
-    index_content, css_content, js_content, cookie_css = await asyncio.gather(
+    fidget_css_src = os.path.join(fidget_dir, "fidget.css")
+    
+    index_content, css_content, js_content, cookie_css, fidget_css = await asyncio.gather(
         read_file(index_path),
         read_file(css_path),
         read_file(js_path),
         read_file(cookie_css_src),
+        read_file(fidget_css_src)
     )
 
-    return index_content, css_content, js_content, cookie_css
+    return index_content, css_content, js_content, cookie_css, fidget_css
 
 
 async def download_image(session: ClientSession, url: str, filename=None) -> str:
@@ -106,12 +109,43 @@ async def download_image(session: ClientSession, url: str, filename=None) -> str
 
 def choose_random_template() -> str:
     """
-    Choose random template folder from templates
+    Choose random template folder from templates. Get path
     """
     chosen_template = random.choice(os.listdir(TEMPLATES_DIR))
     template_dir = os.path.join(TEMPLATES_DIR, chosen_template)
 
     return template_dir
+
+
+def choose_random_fidget_with_params():
+    """
+    Select a random fidget folder and generate the corresponding parameters.
+
+    Returns:
+        fidget_dir (str): Path to the chosen fidget folder.
+        params (dict): Dictionary of parameters required for the fidget.
+                       - Slot machines: {'num_reels': int, 'slot_symbols': list}
+                       - Spin wheel: {'wheel_colors': list}
+    """
+    
+    chosen_fidget = random.choice(os.listdir(config.FIDGETS_DIR))
+    fidget_dir = os.path.join(config.FIDGETS_DIR, chosen_fidget)
+    
+    # Determine parameters based on fidget type
+    params = {}
+    if "slotmachine" in chosen_fidget.lower():  # for slot machines
+        num_reels, slot_symbols = generate_slot_reels()
+        params = {
+            "num_reels": num_reels,
+            "slot_symbols": slot_symbols
+        }
+    elif "spinwheel" in chosen_fidget.lower():  # for spin wheel
+        wheel_colors = spin_wheel_colors()
+        params = {
+            "wheel_colors": wheel_colors
+        }
+    
+    return fidget_dir, params
 
 
 def format_error_message(status: int, store: str | None) -> str:

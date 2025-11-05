@@ -5,7 +5,9 @@ import pathlib
 class AppConfig:
     def __init__(self):
         self.APP_DIR = pathlib.Path(__file__).parent.parent
-        self.COOKIE_DIR = str(self.APP_DIR / "cookie")
+        self.COOKIE_DIR = pathlib.Path(self.APP_DIR / "cookie")
+        self.VAR1_DIR = pathlib.Path(self.APP_DIR / "variant_1_creator")
+        self.FIDGETS_DIR = pathlib.Path(self.VAR1_DIR / "presets/fidgets")
         
         self.DIST_DIR = None
         self.STATIC_DIR = None

@@ -63,10 +63,6 @@ h1 {
     font-weight: 700;
 }
 
-.nav {
-    margin-left: auto;
-}
-
 .nav a {
     color: white;
     text-decoration: none;
@@ -179,7 +175,12 @@ h2 {
 .title-block {
     display: flex;
     flex-direction: column;
+    margin-right: auto;
+    overflow-wrap: anywhere;
+    word-break: normal;
+    line-break: auto;
 }
+
 .purchases-title {
     margin: 0;
     font-size: 10px;
@@ -262,18 +263,22 @@ h2 {
 @media (max-width: 1024px) {
     .header-content {
         flex-direction: column;
-        align-items: flex-start;
     }
 
     .nav {
         margin-left: 0;
         margin-top: 15px;
-        width: 100%;
         display: flex;
         flex-wrap: wrap;
-        gap: 10px;
+        gap: 1rem;
+        width: fit-content;
     }
-
+    .title-block {
+        text-align: center;
+        margin-right: 0;
+        align-items: center;
+        margin-bottom: 8px;
+    }
     .nav a {
         margin-left: 0;
         margin-right: 15px;

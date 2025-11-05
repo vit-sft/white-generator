@@ -16,7 +16,7 @@ html {
 }
 
 .header-container {
-    color: white; 
+    color: white;
     padding: 1rem 2rem;
     background-repeat: no-repeat;
     background-size: cover;
@@ -33,66 +33,75 @@ html {
     font-size: 1.5rem;
     font-weight: bold;
     text-decoration: none;
-    color: white; 
+    color: white;
 }
 
 .nav-menu .menu-icon {
     font-size: 1.5rem;
     cursor: pointer;
 }
+
 .nav-menu {
     display: flex;
-    gap: 2rem; 
+    gap: 2rem;
 }
 
 
 .hero-section {
     text-align: center;
-    padding: 4rem 2rem; 
-    color: white; 
+    padding: 4rem 2rem;
+    color: white;
+    place-items: center;
 }
 
 .hero-title {
     font-size: 3rem;
-    margin-bottom: 0.5rem; 
+    text-align: center;
+    overflow-wrap: anywhere;
+    word-break: normal;
+    line-break: auto;
 }
 
 .hero-subtitle {
     font-size: 1.25rem;
-    margin-bottom: 1.5rem; 
+    margin-bottom: 8px;
 }
 
 .hero-button {
     background-color: var(--primary);
-    color: white; 
-    padding: 0.75rem 1.5rem; 
+    color: white;
+    padding: 0.75rem 1.5rem;
     border: none;
     text-decoration: none;
     font-size: 1rem;
-    border-radius: 4px; 
-    transition: background-color 0.3s ease; 
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+    display: block;
+    width: fit-content;
+    margin-top: 8px;
 }
 
 .hero-button:hover {
-    background-color: #ff4c4c; 
+    background-color: #ff4c4c;
 }
 
 .main-container {
-    padding: 2rem; 
+    padding: 2rem;
     max-width: 1400px;
     margin: -48px auto 48px auto;
-    border-radius: 20px; 
-    background: var(--background); 
+    border-radius: 20px;
+    background: var(--background);
 }
 
 .about-section {
     margin-bottom: 3rem;
     overflow-wrap: break-word;
 }
+
 .about-content {
     display: flex;
     flex-wrap: wrap;
-    gap: 4rem; 
+    gap: 4rem;
 }
 
 .description-block {
@@ -101,38 +110,38 @@ html {
 }
 
 .description-block p {
-  overflow: hidden;
-  transition: max-height 0.5s ease;
-  position: relative;
+    overflow: hidden;
+    transition: max-height 0.5s ease;
+    position: relative;
 }
 
 .description-block.collapsed p {
-  max-height: 50dvh;
+    max-height: 50dvh;
 }
 
 .description-block.collapsed p::after {
-  content: "";
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 3rem;
-  background: linear-gradient(to top, var(--background), rgba(255, 255, 255, 0));
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 3rem;
+    background: linear-gradient(to top, var(--background), rgba(255, 255, 255, 0));
 }
 
 .description-block .read-more {
-  display: block;
-  margin-top: 5px;
-  font-size: 14px;
-  color: #888;
-  cursor: pointer;
-  text-align: center;
-  user-select: none;
-  transition: color 0.2s ease;
+    display: block;
+    margin-top: 5px;
+    font-size: 14px;
+    color: #888;
+    cursor: pointer;
+    text-align: center;
+    user-select: none;
+    transition: color 0.2s ease;
 }
 
 .description-block .read-more:hover {
-  color: #555;
+    color: #555;
 }
 
 .download-section {
@@ -141,31 +150,43 @@ html {
     display: flex;
     flex-direction: column;
     align-items: center;
-    border-radius: 16px; 
-    box-shadow: 4px 4px 20px rgb(49 49 49 / 16%); 
+    border-radius: 16px;
+    box-shadow: 4px 4px 20px rgb(49 49 49 / 16%);
     margin: auto;
-    transform-origin: bottom center; /* pivot around bottom edge */
+    transform-origin: bottom center;
+    /* pivot around bottom edge */
     animation: jumpHeel 1.5s ease-in-out infinite;
     padding: 1rem;
     text-align: center;
-    overflow-wrap: anywhere; /* modern, replaces word-wrap */
-    word-break: normal;      /* don't break words unless needed */
-    line-break: auto;        /* handle Asian text properly if present */
+    overflow-wrap: anywhere;
+    /* modern, replaces word-wrap */
+    word-break: normal;
+    /* don't break words unless needed */
+    line-break: auto;
+    /* handle Asian text properly if present */
 }
 
 @keyframes jumpHeel {
-  0%, 100% {
-    transform: translateY(0) rotateX(0deg);
-  }
-  30% {
-    transform: translateY(-15px) rotateX(0deg); /* jumping up, flat */
-  }
-  60% {
-    transform: translateY(0) rotateX(25deg); /* heel down landing */
-  }
-  80% {
-    transform: translateY(0) rotateX(0deg); /* recover */
-  }
+
+    0%,
+    100% {
+        transform: translateY(0) rotateX(0deg);
+    }
+
+    30% {
+        transform: translateY(-15px) rotateX(0deg);
+        /* jumping up, flat */
+    }
+
+    60% {
+        transform: translateY(0) rotateX(25deg);
+        /* heel down landing */
+    }
+
+    80% {
+        transform: translateY(0) rotateX(0deg);
+        /* recover */
+    }
 }
 
 .purchases-title {
@@ -175,9 +196,10 @@ html {
 }
 
 .image-wrapper {
-    margin-top: 1rem; 
-    padding: 0 2rem; 
+    margin-top: 1rem;
+    padding: 0 2rem;
 }
+
 .image-wrapper img {
     max-width: 360px;
     width: 100%;
@@ -187,14 +209,14 @@ html {
 }
 
 .download-button-wrapper {
-    padding: 1rem; 
+    padding: 1rem;
 }
 
 .download-button {
     background-color: var(--text-secondary);
-    color: white; 
-    padding: 0.5rem 1rem; 
-    border-radius: 4px; 
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
     text-decoration: none;
     font-weight: bold;
 }
@@ -211,6 +233,7 @@ html {
     position: relative;
     border-radius: 16px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    margin-bottom: 1rem;
 }
 
 .gallery-container {
@@ -285,15 +308,15 @@ html {
 
 .footer {
     background: linear-gradient(190deg, var(--primary), var(--text-secondary));
-    color: white; 
-    padding: 2rem 1rem; 
+    color: white;
+    padding: 2rem 1rem;
 }
 
 .footer-container {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 1.5rem; 
+    gap: 1.5rem;
     text-align: center;
 }
 
@@ -306,7 +329,7 @@ html {
 
 .footer-title {
     font-size: 1.25rem;
-    margin-top: 0.5rem; 
+    margin-top: 0.5rem;
 }
 
 .footer-text {
@@ -358,13 +381,18 @@ html {
     .about-section {
         flex-direction: column;
     }
+
     .about-content {
         grid-template-columns: 1fr;
     }
-    .nav-bar {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0.5rem; 
+
+    #title {
+        display: none;
+    }
+
+    .nav-menu {
+        flex: 1;
+        justify-content: space-evenly;
     }
 
     .hero-title {
