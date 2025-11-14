@@ -257,7 +257,7 @@ class AppBuilder:
         fidget_js_src = os.path.join(fidget_path, "fidget.js")
 
         index_path = os.path.join(config.DIST_DIR, "source_target.html")
-        css_path = os.path.join(config.CSS_DIR, "style.css")
+        css_path = os.path.join(config.CSS_DIR, "main_style.css")
         js_path = os.path.join(config.JS_DIR, "main.js")
         fonts_path = os.path.join(config.FONTS_DIR, chosen_font)
 
