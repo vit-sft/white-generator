@@ -109,11 +109,7 @@ def parse_app_store(soup: BeautifulSoup, app_url: str) -> AppUrlData:
         icon_url = urls[-1]  # Get the largest (last) image
 
     # # Screenshots
-    ul = soup.select('section div ul')
-    if len(ul[1]) < len(ul[2]):
-        ul = ul[2]
-    else:
-        ul = ul[1]
+    ul = soup.select_one('#product_media_phone_ section div ul')
 
     screenshot_urls = []
 
