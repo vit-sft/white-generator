@@ -73,7 +73,7 @@ def parse_app_store(soup: BeautifulSoup, app_url: str) -> AppUrlData:
     Parser for app store links
     """
     # Title
-    title_tag = soup.select_one("h1.product-header__title")
+    title_tag = soup.select_one("h1")
     title = None
 
     if title_tag:
@@ -85,29 +85,32 @@ def parse_app_store(soup: BeautifulSoup, app_url: str) -> AppUrlData:
     # Description
     description = None
 
-    desc_tag = soup.select_one("div.section__description p")
+    desc_tag = soup.select_one("section article p")
 
     if desc_tag:
         description = desc_tag.get_text(separator="<br>").strip()
         description = description.replace("{", "{{").replace("}", "}}")
 
-    # Icon
-    picture = soup.select_one("picture.we-artwork--ios-app-icon")
+    # # Icon
+    # picture = soup.select_one('[role="presentation"]')
 
-    # Find the source with PNG type
-    source_png = None
-    if picture:
-        source_png = picture.find("source", attrs={"type": "image/png"})
+    # # Find the source with PNG type
+    # source_png = None
+    # if picture:
+    #     source_png = picture.find("source", attrs={"type": "image/png"})
 
+    icon_img = soup.select_one('[type="image/webp"][srcset]')
     # Parse the srcset and get the largest URL
     icon_url = None
-    if source_png:
-        srcset = source_png.get("srcset")
+
+    if icon_img:
+        srcset = icon_img.get("srcset")
         urls = [url.strip().split(" ")[0] for url in srcset.split(",")]
         icon_url = urls[-1]  # Get the largest (last) image
 
-    # Screenshots
-    ul = soup.select_one("ul.we-screenshot-viewer__screenshots-list")
+    # # Screenshots
+    ul = soup.select('section div ul')[1]
+
     screenshot_urls = []
 
     if ul:

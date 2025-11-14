@@ -9,7 +9,7 @@ from white_generator.utils import build_directories
 class AsyncS3Client:
     """
     Async client for AWS S3 bucket operations.
-    
+
     Provides async methods to interact with an S3 bucket — such as listing, uploading,
     downloading, and deleting files or directories.
 
@@ -17,6 +17,7 @@ class AsyncS3Client:
         async with AsyncS3Client(bucket_name="my-bucket", basic_folder="data/") as s3:
             dirs = await s3.list_directories()
     """
+
     def __init__(
         self,
         aws_access_key_id,
@@ -82,38 +83,48 @@ class AsyncS3Client:
         object_keys = [obj["Key"] for obj in resp.get("Contents", [])]
         return object_keys
 
-
     async def upload_file(self, local_path: str, key: str, content_type):
         """Upload file in a from relative path ot key directory in Bucket"""
-        
+
         async with aiofiles.open(local_path, "rb") as f:
             body = await f.read()
             await self._client.put_object(
                 Bucket=self.bucket_name, Key=key, Body=body, ContentType=content_type
             )
-            
+
     async def upload_directory(self, origin: str, prefix: str):
         """Recursively upload all files in a origin directory to Bucket"""
-        
+
         # Define the key prefix and cloud base URL
         key_prefix = f"{self.basic_folder}{prefix}".rstrip("/")
         base_url = f"https://{self.bucket_name}.s3.{self.region_name}.amazonaws.com/{key_prefix}/source_target.html"
-        
+
         tasks = []
-        
+
         for root, _, files in os.walk(origin):
             for filename in files:
                 local_path = os.path.join(root, filename)
                 relative_path = os.path.relpath(local_path, start=origin)
                 key = f"{self.basic_folder}{prefix}/{relative_path}".replace("\\", "/")
                 content_type, _ = mimetypes.guess_type(local_path)
-                tasks.append(self.upload_file(local_path=local_path, key=key, content_type=content_type))
-                
+                tasks.append(
+                    self.upload_file(
+                        local_path=local_path, key=key, content_type=content_type
+                    )
+                )
+
         await asyncio.gather(*tasks)
         return base_url
 
+    async def delete_file(self, key: str) -> None:
+        """Delete a single S3 object."""
+        if not key:
+            return
+
+        await self._client.delete_object(Bucket=self.bucket_name, Key=key)
+
     async def delete_directory(self, prefix: str) -> None:
-        """Delete all S3 objects under prefix."""
+        """Delete all S3 objects under a given prefix concurrently."""
         if not prefix:
             return
 
@@ -121,12 +132,8 @@ class AsyncS3Client:
         if not objects_to_delete:
             return
 
-        delete_params = {
-            "Bucket": self.bucket_name,
-            "Delete": {"Objects": [{"Key": obj} for obj in objects_to_delete]},
-        }
-
-        await self._client.delete_objects(**delete_params)
+        tasks = [self.delete_file(obj) for obj in objects_to_delete]
+        await asyncio.gather(*tasks)
 
     async def download_file(self, key: str, local_path: str) -> None:
         """Download S3 object file and save it locally."""
@@ -150,7 +157,7 @@ class AsyncS3Client:
         # Define the key prefix and cloud base URL
         key_prefix = f"{self.basic_folder}{prefix}".rstrip("/")
         base_url = f"https://{self.bucket_name}.s3.{self.region_name}.amazonaws.com/{key_prefix}/source_target.html"
-        
+
         tasks = []
         for obj in objects_to_install:
             key = obj
@@ -166,7 +173,9 @@ class AsyncS3Client:
         await asyncio.gather(*tasks)
         return os.path.abspath(destination), base_url
 
-    async def check_bucket_cache(self, destination: str, campaign_id: str, hashed_string: str):
+    async def check_bucket_cache(
+        self, destination: str, campaign_id: str, hashed_string: str
+    ):
         """
         Looking for White page by campaign_id in a Bucket. If exists: downloading it into destination.
         If exists but with old data - delete it.

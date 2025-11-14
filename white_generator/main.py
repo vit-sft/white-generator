@@ -21,7 +21,7 @@ async def build_app_site(
     access_key: str = None,
     access_secret: str = None,
     template_number: int = None,
-) -> str:
+) -> dict:
     """
     Build app site based on the given mode and install from/upload it to S3.
     Returns destination.
@@ -118,7 +118,7 @@ if __name__ == "__main__":
             llm_api_key=os.getenv("LLM_API_KEY"),
             access_key=os.getenv("ACCESS_KEY"),
             access_secret=os.getenv("ACCESS_SECRET"),
-            template_number=1
+            # template_number=4
         )
 
         print(result)
