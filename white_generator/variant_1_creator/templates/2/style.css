@@ -22,6 +22,7 @@ body {
     padding: 40px;
     text-align: center;
     overflow-y: auto;
+    position: relative;
 }
 
 .logo {
@@ -31,23 +32,34 @@ body {
     margin-bottom: 8px;
     aspect-ratio: 1 / 1;
     object-fit: cover;
-    transform-origin: bottom center; /* pivot around bottom edge */
+    transform-origin: bottom center;
+    /* pivot around bottom edge */
     animation: jumpHeel 1.5s ease-in-out infinite;
 }
+
 @keyframes jumpHeel {
-  0%, 100% {
-    transform: translateY(0) rotateX(0deg);
-  }
-  30% {
-    transform: translateY(-15px) rotateX(0deg); /* jumping up, flat */
-  }
-  60% {
-    transform: translateY(0) rotateX(25deg); /* heel down landing */
-  }
-  80% {
-    transform: translateY(0) rotateX(0deg); /* recover */
-  }
+
+    0%,
+    100% {
+        transform: translateY(0) rotateX(0deg);
+    }
+
+    30% {
+        transform: translateY(-15px) rotateX(0deg);
+        /* jumping up, flat */
+    }
+
+    60% {
+        transform: translateY(0) rotateX(25deg);
+        /* heel down landing */
+    }
+
+    80% {
+        transform: translateY(0) rotateX(0deg);
+        /* recover */
+    }
 }
+
 .purchases-title {
     margin: 0;
     font-size: 10px;
@@ -104,8 +116,11 @@ h1 {
 .description h2 {
     color: var(--text-secondary);
     text-align: left;
-    border-bottom: 1px solid #ddd;
-    padding-bottom: 5px;
+    /* border-bottom: 1px solid #ddd; */
+    padding: 0;
+    margin: 0;
+    order: 1;
+    align-self: baseline;
 }
 
 .description p {
@@ -199,6 +214,42 @@ h1 {
 
 .footer-accordion a:hover {
     text-decoration: underline;
+}
+
+canvas {
+    cursor: pointer;
+    border-radius: 50%;
+    background: radial-gradient(circle at center, #222 0%, #111 100%);
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    touch-action: manipulation;
+    position: absolute;
+    top: 16px;
+    right: 16px;
+}
+
+.description__about {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #ddd;
+    padding: 12px 0;
+}
+@media (max-width: 1200px) {
+    
+    canvas {
+        position: static;
+        transform: none;
+    }
+    .description__about {
+        flex-direction: row;
+        align-items: end;
+    }
+    .description h2 {
+        order: 0;
+        align-self: end;
+    }
 }
 
 @media (max-width: 768px) {
