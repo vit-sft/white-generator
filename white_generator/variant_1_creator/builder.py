@@ -127,21 +127,29 @@ class AppBuilder:
             ),
         }
 
+        # async with ClientSession(headers=headers) as session:
+        #     screenshot_tasks = [
+        #         download_image(session, url) for url in data.screenshot_urls
+        #     ]
+        #     screenshot_results = await asyncio.gather(*screenshot_tasks)
+
+        # # Filter out failed downloads
+        # screenshot_files = [path for path in screenshot_results if path]
         async with ClientSession(headers=headers) as session:
+            icon_task = download_image(session, data.icon_url, filename='icon')
             screenshot_tasks = [
                 download_image(session, url) for url in data.screenshot_urls
             ]
-            screenshot_results = await asyncio.gather(*screenshot_tasks)
+            images_results = await asyncio.gather(icon_task, *screenshot_tasks)
 
         # Filter out failed downloads
-        screenshot_files = [path for path in screenshot_results if path]
-
-        # Save icon bytes
-        icon_dst = os.path.join(config.IMG_DIR, "icon.webp")
-        icon_path = await write_bytes_file(icon_dst, data.icon_data)
+        images_files = [path for path in images_results if path]
+        # # Save icon bytes
+        # icon_dst = os.path.join(config.IMG_DIR, "icon.webp")
+        # icon_path = await write_bytes_file(icon_dst, data.icon_data)
 
         return await self._build_site(
-            data.title, data.description, icon_path, screenshot_files, data.app_url
+            data.title, data.description, images_files[0], images_files[1:], data.app_url
         )
 
     async def _build_site(

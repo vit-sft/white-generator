@@ -295,19 +295,29 @@ class AppDataGenerator:
         icon_query = generation_query + " slots game"
         screenshots_query = generation_query + " slots play"
 
-        icon_task = asyncio.create_task(self._generate_app_icon(icon_query))
+        # icon_task = asyncio.create_task(self._generate_app_icon(icon_query))
+        icon_task = asyncio.create_task(self._get_screenshots_query(icon_query, 1))
+
+
         screenshots_task = asyncio.create_task(
             self._get_screenshots_query(screenshots_query, random.randint(5, 9))
         )
         desc_task = asyncio.create_task(self._generate_app_desc(generation_query))
 
-        icon_bytes, screenshot_urls, description = await asyncio.gather(
+        # icon_bytes, screenshot_urls, description = await asyncio.gather(
+        #     icon_task, screenshots_task, desc_task
+        # )
+        icon_url, screenshot_urls, description = await asyncio.gather(
             icon_task, screenshots_task, desc_task
         )
+        if not icon_url or not screenshot_urls:
+            raise ValueError(f"Can't find images for Generation Query: {generation_query}")
+        
         return AppGeneratedData(
             title=generation_query,
             description=description,
-            icon_data=icon_bytes,
+            # icon_data=icon_bytes,
+            icon_url=icon_url[0],
             screenshot_urls=screenshot_urls,
             app_url='about:blank" target="_blank',
         )

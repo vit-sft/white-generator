@@ -30,6 +30,7 @@ class AppGeneratedData(BaseModel):
     """
     title: str
     description: str
-    icon_data: bytes = Field(..., description="Base64-encoded icon image")
+    # icon_data: bytes = Field(..., description="Base64-encoded icon image")
+    icon_url: str = Field(..., description="Url to icon image")
     screenshot_urls: list[str] = Field(..., description="List of urls for screenshots")
     app_url: str = Field(default='about:blank" target="_blank', description="Default URL to open app preview or external link")
