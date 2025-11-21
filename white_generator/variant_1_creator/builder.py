@@ -210,11 +210,11 @@ class AppBuilder:
         preview_img = os.path.basename(screenshot_files[0])
 
         store = identify_store(app_url)
-        badge_map = {
-            "play_store": "badge-google-market.png",
-            "app_store": "badge-apple-store.png",
-        }
-        badge = badge_map.get(store, "badge-download.png")
+        # badge_map = {
+        #     "play_store": "badge-google-market.png",
+        #     "app_store": "badge-apple-store.png",
+        # }
+        # badge = badge_map.get(store, "badge-download.png")
 
         # Random elements
         styles = get_random_style()
@@ -238,7 +238,7 @@ class AppBuilder:
             "screenshots_html": screenshots_html,
             "fidget_html": fidget_component,
             "cookie_html": cookie_component,
-            "badge": badge,
+            # "badge": badge,
             "preview_img": preview_img,
             "background_img": random.choices(
                 [preview_img, ""],

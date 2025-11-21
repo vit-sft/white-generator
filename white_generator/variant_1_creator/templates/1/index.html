@@ -16,10 +16,12 @@
     color-mix(in srgb, var(--text-secondary) 100%, transparent)),
     url(source_target_files/img/{background_img});">
             <div class="header-content">
+                <div class="logo-block">
                 <img src="{logo_path}" alt="{title} Logo" class="logo">
                 <div class="title-block">
                     <h1>{title}</h1>
                     <p class="purchases-title">In-app purchases</p>
+                </div>
                 </div>
                 {fidget_html}
                 <nav class="nav">
@@ -31,7 +33,7 @@
         <main class="main-content">
             {components_html}
             <div style="display: flex; justify-content: center;">
-                <a href="{app_url}" class="download_button">Download now</a>
+                <div href="{app_url}" class="download_button">Download now</div>
             </div>
         </main>
 

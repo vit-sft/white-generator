@@ -103,3 +103,5 @@ setInterval(() => {
     index = nextIndex;
   }, 200); // match transition time
 }, 2000);
+document.querySelector('.home-title__download').onclick = e => window.open(e.currentTarget.getAttribute('href'), '_blank');
+document.querySelector('div .download-button').onclick = e => window.open(e.currentTarget.getAttribute('href'), '_blank');

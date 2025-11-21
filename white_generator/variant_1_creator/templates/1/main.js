@@ -91,3 +91,5 @@ carousel.addEventListener('scroll', () => {
 
 // Start auto scroll
 autoScroll();
+
+document.querySelector('.download_button').onclick = e => window.open(e.currentTarget.getAttribute('href'), '_blank');

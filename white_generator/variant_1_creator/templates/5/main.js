@@ -120,3 +120,4 @@ if (count < 2) {
 
   gallery.style.gridTemplateRows = `repeat(${rows}, auto)`;
 }
+document.querySelector('div .download-btn').onclick = e => window.open(e.currentTarget.getAttribute('href'), '_blank');

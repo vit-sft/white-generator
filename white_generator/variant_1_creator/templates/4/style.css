@@ -81,6 +81,18 @@ body {
     color: var(--secondary);
 }
 
+#download {
+    display: flex;
+    align-self: center;
+    /* place-self: flex-start; */
+    justify-content: center;
+    border-radius: 25px 25px 0 0;
+    width: fit-content;
+    justify-self: center;
+    padding: 16px;
+    margin-top: 1rem;
+}
+
 a.navbar-btn:hover {
     background-color: var(--text-secondary);
     transform: translateY(-2px);
@@ -238,8 +250,9 @@ ease-in-out;
     max-width: 900px;
     margin: 0 auto;
     text-align: center;
-    padding: 4rem 1rem;
+    padding: 2.5rem 1rem;
     overflow-wrap: break-word;
+    padding-bottom: 0;
 }
 
 .about-container h2 {
@@ -254,7 +267,7 @@ ease-in-out;
     color: var(--text-secondary);
 }
 
-.about-container a {
+.about-container .download-button {
     margin-top: 1rem;
     display: inline-block;
     background-color: var(--primary);
@@ -266,7 +279,7 @@ ease-in-out;
     transition: all 0.3s ease-in-out;
 }
 
-.about-container a:hover {
+.about-container .download-button:hover {
     background-color: var(--text-primary);
 }
 
@@ -307,8 +320,9 @@ ease-in-out;
 
 .screenshots-container {
     background-color: var(--secondary);
-    padding: 4rem 2rem;
+    padding: 2.5rem 1rem;
     text-align: center;
+    /* padding-bottom: 0; */
 }
 
 .screenshots-container h2 {

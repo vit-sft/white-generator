@@ -113,3 +113,6 @@ thumbs.forEach((thumb, index) => {
     showSlide(index);
   });
 });
+
+document.querySelector('div .hero-button').onclick = e => window.open(e.currentTarget.getAttribute('href'), '_blank');
+document.querySelector('div .download-button').onclick = e => window.open(e.currentTarget.getAttribute('href'), '_blank');

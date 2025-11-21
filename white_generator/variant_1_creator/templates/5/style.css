@@ -89,6 +89,10 @@ body {
     align-items: center;
 }
 
+.hero-content h1 {
+    margin-bottom: 0.5rem;
+}
+
 .nav-title-block {
     flex: 1;
     display: flex;
@@ -181,7 +185,7 @@ h1 {
     color: white;
 }
 
-a.download-btn:hover {
+div.download-btn:hover {
     background-color: var(--text-primary);
     transform: translateY(-2px);
 }
