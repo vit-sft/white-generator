@@ -179,7 +179,7 @@ class AppBuilder:
 
         # Build screenshots HTML
         screenshots_html = "\n".join(
-            f'<div><img src="source_target_files/img/{os.path.basename(p)}" alt="Screenshot {i + 1}"></div>'
+            f'<div><img src="img/{os.path.basename(p)}" alt="Screenshot {i + 1}"></div>'
             for i, p in enumerate(screenshot_files)
         )
 
@@ -203,13 +203,13 @@ class AppBuilder:
 
         # Prepare app data
         logo_path = (
-            f"source_target_files/img/{os.path.basename(icon_path)}"
+            f"img/{os.path.basename(icon_path)}"
             if icon_path
             else ""
         )
         preview_img = os.path.basename(screenshot_files[0])
 
-        store = identify_store(app_url)
+        # store = identify_store(app_url)
         # badge_map = {
         #     "play_store": "badge-google-market.png",
         #     "app_store": "badge-apple-store.png",
@@ -227,11 +227,12 @@ class AppBuilder:
         principles_html = get_use_principles()
         terms_html = get_terms()
         faq_html = get_faq()
-
+        white_base_id = os.path.basename(config.STATIC_DIR)
         # Build context dictionary
         context = {
             "title": title,
             "description_html": description,
+            "base_path": white_base_id,
             "app_url": app_url,
             "logo_path": logo_path,
             "components_html": components_html,

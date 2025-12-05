@@ -121,3 +121,16 @@ if (count < 2) {
   gallery.style.gridTemplateRows = `repeat(${rows}, auto)`;
 }
 document.querySelector('div .download-btn').onclick = e => window.open(e.currentTarget.getAttribute('href'), '_blank');
+
+document.querySelectorAll('a[href^="#"]').forEach(link => {
+    link.addEventListener('click', e => {
+        e.preventDefault();
+
+        const targetId = link.getAttribute('href').substring(1);
+        const targetElement = document.getElementById(targetId);
+
+        if (targetElement) {
+            targetElement.scrollIntoView({ behavior: 'smooth' });
+        }
+    });
+});

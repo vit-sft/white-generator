@@ -93,3 +93,16 @@ carousel.addEventListener('scroll', () => {
 autoScroll();
 
 document.querySelector('.download_button').onclick = e => window.open(e.currentTarget.getAttribute('href'), '_blank');
+
+document.querySelectorAll('a[href^="#"]').forEach(link => {
+    link.addEventListener('click', e => {
+        e.preventDefault();
+
+        const targetId = link.getAttribute('href').substring(1);
+        const targetElement = document.getElementById(targetId);
+
+        if (targetElement) {
+            targetElement.scrollIntoView({ behavior: 'smooth' });
+        }
+    });
+});

@@ -116,3 +116,16 @@ thumbs.forEach((thumb, index) => {
 
 document.querySelector('div .hero-button').onclick = e => window.open(e.currentTarget.getAttribute('href'), '_blank');
 document.querySelector('div .download-button').onclick = e => window.open(e.currentTarget.getAttribute('href'), '_blank');
+
+document.querySelectorAll('a[href^="#"]').forEach(link => {
+    link.addEventListener('click', e => {
+        e.preventDefault();
+
+        const targetId = link.getAttribute('href').substring(1);
+        const targetElement = document.getElementById(targetId);
+
+        if (targetElement) {
+            targetElement.scrollIntoView({ behavior: 'smooth' });
+        }
+    });
+});

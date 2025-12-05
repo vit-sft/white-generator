@@ -5,8 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{title}</title>
+    <base href="source_target_files/{base_path}/">
     <link rel="icon" sizes="16x16" href="{logo_path}" />
-    <link rel="stylesheet" href="source_target_files/css/main_style.css">
+    <link rel="stylesheet" href="css/main_style.css">
 </head>
 
 <body>
@@ -14,7 +15,7 @@
         <header class="header" style="background-image: linear-gradient(135deg, 
     color-mix(in srgb, var(--primary) 90%, transparent),
     color-mix(in srgb, var(--text-secondary) 100%, transparent)),
-    url(source_target_files/img/{background_img});">
+    url(img/{background_img});">
             <div class="header-content">
                 <div class="logo-block">
                 <img src="{logo_path}" alt="{title} Logo" class="logo">
@@ -78,7 +79,7 @@
                     </p>
                 </div>
             </div>
-            <script src="source_target_files/js/main.js"></script>
+            <script src="js/main.js"></script>
             {cookie_html}
             <p>{title} &copy; 2025</p>
         </footer>
