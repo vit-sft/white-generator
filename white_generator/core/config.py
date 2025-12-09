@@ -32,7 +32,7 @@ class AppConfig:
     def set_dist_dir(self, path: str):
         """Set the base build directory and dependent paths."""
         self.DIST_DIR = os.path.abspath(path)
-        self.STATIC_DIR = os.path.join(self.DIST_DIR, f"source_target_files\\{generate_random_id(8)}")
+        self.STATIC_DIR = os.path.join(self.DIST_DIR, os.path.join("source_target_files", generate_random_id(8)))
         self.IMG_DIR = os.path.join(self.STATIC_DIR, "img")
         self.CSS_DIR = os.path.join(self.STATIC_DIR, "css")
         self.JS_DIR = os.path.join(self.STATIC_DIR, "js")
