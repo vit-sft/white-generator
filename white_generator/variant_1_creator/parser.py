@@ -85,7 +85,7 @@ def parse_app_store(soup: BeautifulSoup, app_url: str) -> AppUrlData:
     # Description
     description = None
 
-    desc_tag = soup.select_one("section article p div span")
+    desc_tag = soup.select_one('section p div[role="text"] span')
 
     if desc_tag:
         description = desc_tag.get_text(separator="<br>").strip()
