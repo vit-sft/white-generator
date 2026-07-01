@@ -50,7 +50,7 @@ def parse_google_play(soup: BeautifulSoup, app_url: str) -> AppUrlData:
         icon_url = None
 
     # Screenshot images
-    screenshot_imgs = images[3:] if len(images) > 3 else []
+    screenshot_imgs = images[5:] if len(images) > 5 else []
     screenshot_urls = []
     for img in screenshot_imgs:
         if img.get("srcset"):
