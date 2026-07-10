@@ -77,10 +77,7 @@ def parse_app_store(soup: BeautifulSoup, app_url: str) -> AppUrlData:
     title = None
 
     if title_tag:
-        # Filter out tags, keeping only the text parts
-        title_parts = [part for part in title_tag.contents if isinstance(part, str)]
-        title = "".join(title_parts).strip()
-        title = title.replace("{", "{{").replace("}", "}}")
+        title = title_tag.text.strip()
 
     # Description
     description = None
