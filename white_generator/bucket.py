@@ -5,6 +5,8 @@ import asyncio
 import mimetypes
 from white_generator.utils import build_directories
 
+mimetypes.add_type("image/webp", ".webp")
+mimetypes.add_type("font/ttf", ".ttf")
 
 class AsyncS3Client:
     """
