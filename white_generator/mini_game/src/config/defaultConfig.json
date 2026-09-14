@@ -1,0 +1,39 @@
+{
+  "background": {
+    "type": "gradient",
+    "value": "linear-gradient(180deg, #6ec6ff 0%, #cdeffd 60%, #eaf7ff 100%)"
+  },
+  "block": {
+    "colors": ["#8b5a2b", "#a0672f", "#7a4a24", "#93613a"],
+    "pattern": "solid",
+    "borderRadius": 6,
+    "shadow": true
+  },
+  "footer": {
+    "backgroundColor": "#6b7280",
+    "borderColor": "#facc15",
+    "borderWidth": 6
+  },
+  "points": {
+    "label": "Score",
+    "bestLabel": "Best Score",
+    "font": "system-ui, sans-serif",
+    "color": "#1e293b",
+    "fontSize": 22,
+    "currencyIcon": "💎"
+  },
+  "button": {
+    "retryLabel": "Retry",
+    "backgroundColor": "#f97316",
+    "textColor": "#ffffff",
+    "borderRadius": 12
+  },
+  "gameOverText": "Game Over",
+  "game": {
+    "width": 360,
+    "height": 600,
+    "footerHeight": 80,
+    "topMargin": 40,
+    "moveSpeed": 2.2
+  }
+}
