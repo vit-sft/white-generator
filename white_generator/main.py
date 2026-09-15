@@ -171,7 +171,7 @@ if __name__ == "__main__":
     async def runner():
         result = await build_app_site(
             target_directory=target_directory,
-            **conf_data1,
+            **conf_data3,
             img_cx=os.getenv("IMG_CX"),
             img_api_token=os.getenv("IMG_API_TOKEN"),
             llm_api_key=os.getenv("LLM_API_KEY"),
