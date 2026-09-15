@@ -1,8 +1,16 @@
 import { useEffect, useRef, useState } from "react";
 import Block from "./components/Block";
 import CurrencyIcon from "./components/CurrencyIcon";
+import Sky from "./components/Sky";
 import { loadConfig } from "./config/loadConfig";
-import { BASE_BLOCK_HEIGHT, START_WIDTH, MIN_WIDTH, NARROW_STEP } from "./constants";
+import { MIN_WIDTH_RATIO, NARROW_STEP_RATIO } from "./constants";
+
+function getBlockSize() {
+  const w = window.innerWidth;
+  if (w >= 1024) return { block: 200, footer: 140 };
+  if (w >= 600) return { block: 150, footer: 110 };
+  return { block: 130, footer: 90 };
+}
 
 export default function App() {
   const [config, setConfig] = useState(null);
@@ -14,8 +22,25 @@ export default function App() {
     return saved ? Number(saved) : 0;
   });
   const [gameOver, setGameOver] = useState(false);
+  const [sizes, setSizes] = useState(getBlockSize);
+  const [gameWidth, setGameWidth] = useState(window.innerWidth);
   const rafRef = useRef(null);
   const dirRef = useRef(1);
+  const lastTextureRef = useRef(null);
+  const containerRef = useRef(null);
+
+  useEffect(() => {
+    function onResize() {
+      setSizes(getBlockSize());
+      setGameWidth(window.innerWidth);
+    }
+    window.addEventListener("resize", onResize);
+    window.addEventListener("orientationchange", onResize);
+    return () => {
+      window.removeEventListener("resize", onResize);
+      window.removeEventListener("orientationchange", onResize);
+    };
+  }, []);
 
   useEffect(() => {
     loadConfig().then((cfg) => {
@@ -27,22 +52,40 @@ export default function App() {
 
   if (!config) return null;
 
-  const { width: GAME_WIDTH, height: GAME_HEIGHT, footerHeight: FOOTER_HEIGHT, topMargin: TOP_MARGIN, moveSpeed: MOVE_SPEED } = config.game;
+  const START_WIDTH = sizes.block;
+  const BASE_BLOCK_HEIGHT = sizes.block;
+  const FOOTER_HEIGHT = sizes.footer;
+  const MIN_WIDTH = START_WIDTH * MIN_WIDTH_RATIO;
+  const NARROW_STEP = START_WIDTH * NARROW_STEP_RATIO;
 
-  const PLAYFIELD_HEIGHT = GAME_HEIGHT - TOP_MARGIN - FOOTER_HEIGHT;
-  const TARGET_CURRENT_BOTTOM = FOOTER_HEIGHT + PLAYFIELD_HEIGHT / 2;
-
-  function pickColor(cfg) {
+  function pickBlockStyle(cfg) {
+    const textures = cfg.block.textures;
+    if (textures && textures.length > 0) {
+      let pool = textures;
+      if (textures.length > 1 && lastTextureRef.current) {
+        pool = textures.filter((t) => t !== lastTextureRef.current);
+      }
+      const texture = pool[Math.floor(Math.random() * pool.length)];
+      lastTextureRef.current = texture;
+      return { texture, color: null };
+    }
     const colors = cfg.block.colors;
-    return colors[Math.floor(Math.random() * colors.length)];
+    return {
+      texture: null,
+      color: colors[Math.floor(Math.random() * colors.length)],
+    };
   }
 
   function startGame(cfg, existingStack) {
     const width = existingStack.length
-      ? Math.max(MIN_WIDTH, existingStack[existingStack.length - 1].width - NARROW_STEP)
+      ? Math.max(
+          MIN_WIDTH,
+          existingStack[existingStack.length - 1].width - NARROW_STEP,
+        )
       : START_WIDTH;
     dirRef.current = 1;
-    setCurrent({ x: 0, width, color: pickColor(cfg) });
+    const style = pickBlockStyle(cfg);
+    setCurrent({ x: 0, width, ...style });
     animate(cfg);
   }
 
@@ -52,9 +95,15 @@ export default function App() {
       setCurrent((prev) => {
         if (!prev) return prev;
         let nextX = prev.x + cfg.game.moveSpeed * dirRef.current;
-        const maxX = cfg.game.width - prev.width;
-        if (nextX <= 0) { nextX = 0; dirRef.current = 1; }
-        if (nextX >= maxX) { nextX = maxX; dirRef.current = -1; }
+        const maxX = gameWidth - prev.width;
+        if (nextX <= 0) {
+          nextX = 0;
+          dirRef.current = 1;
+        }
+        if (nextX >= maxX) {
+          nextX = maxX;
+          dirRef.current = -1;
+        }
         return { ...prev, x: nextX };
       });
       rafRef.current = requestAnimationFrame(step);
@@ -69,17 +118,30 @@ export default function App() {
     let placedBlock;
 
     if (!lastBlock) {
-      placedBlock = { x: current.x, width: current.width, color: current.color };
+      placedBlock = {
+        x: current.x,
+        width: current.width,
+        color: current.color,
+        texture: current.texture,
+      };
     } else {
       const overlapStart = Math.max(current.x, lastBlock.x);
-      const overlapEnd = Math.min(current.x + current.width, lastBlock.x + lastBlock.width);
+      const overlapEnd = Math.min(
+        current.x + current.width,
+        lastBlock.x + lastBlock.width,
+      );
       const overlapWidth = overlapEnd - overlapStart;
 
       if (overlapWidth <= 4) {
         endGame();
         return;
       }
-      placedBlock = { x: overlapStart, width: overlapWidth, color: current.color };
+      placedBlock = {
+        x: overlapStart,
+        width: overlapWidth,
+        color: current.color,
+        texture: current.texture,
+      };
     }
 
     const newStack = [...stack, placedBlock];
@@ -105,24 +167,26 @@ export default function App() {
     startGame(config, []);
   }
 
+  const containerHeight =
+    containerRef.current?.clientHeight || window.innerHeight;
+  const playfieldHeight = containerHeight - FOOTER_HEIGHT;
+  const targetCurrentBottom = FOOTER_HEIGHT + playfieldHeight * 0.5;
   const currentWorldBottom = FOOTER_HEIGHT + stack.length * BASE_BLOCK_HEIGHT;
-  const cameraOffset = Math.max(0, currentWorldBottom - TARGET_CURRENT_BOTTOM);
+  const cameraOffset = Math.max(0, currentWorldBottom - targetCurrentBottom);
+
+  const skyScrollOffset = Math.min(
+    stack.length * config.background.scrollPixelsPerBlock,
+    config.background.maxScroll,
+  );
 
   return (
-    <div
-      onClick={handleTap}
-      style={{
-        width: GAME_WIDTH,
-        height: GAME_HEIGHT,
-        margin: "40px auto",
-        position: "relative",
-        overflow: "hidden",
-        background: config.background.value,
-        borderRadius: 16,
-        cursor: "pointer",
-        userSelect: "none",
-      }}
-    >
+    <div ref={containerRef} className="game-container" onClick={handleTap}>
+      <Sky
+        image={config.background.image}
+        fallbackColor={config.background.fallbackColor}
+        scrollOffset={skyScrollOffset}
+      />
+
       <div
         style={{
           position: "absolute",
@@ -140,8 +204,19 @@ export default function App() {
         <div style={{ fontSize: config.points.fontSize * 0.6 }}>
           {config.points.bestLabel}: {bestScore}
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: config.points.fontSize, fontWeight: "bold" }}>
-          <CurrencyIcon icon={config.points.currencyIcon} size={config.points.fontSize} />
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 6,
+            fontSize: config.points.fontSize,
+            fontWeight: "bold",
+          }}
+        >
+          <CurrencyIcon
+            icon={config.points.currencyIcon}
+            size={config.points.fontSize}
+          />
           {score}
         </div>
       </div>
@@ -162,6 +237,8 @@ export default function App() {
             height={BASE_BLOCK_HEIGHT}
             bottom={FOOTER_HEIGHT + i * BASE_BLOCK_HEIGHT}
             color={b.color}
+            texture={b.texture}
+            maxWidth={START_WIDTH}
             borderRadius={config.block.borderRadius}
             shadow={config.block.shadow}
           />
@@ -174,6 +251,8 @@ export default function App() {
             height={BASE_BLOCK_HEIGHT}
             bottom={FOOTER_HEIGHT + stack.length * BASE_BLOCK_HEIGHT}
             color={current.color}
+            texture={current.texture}
+            maxWidth={START_WIDTH}
             borderRadius={config.block.borderRadius}
             shadow={config.block.shadow}
           />
@@ -181,32 +260,24 @@ export default function App() {
       </div>
 
       <div
+        className="game-footer"
         onClick={(e) => e.stopPropagation()}
         style={{
-          position: "absolute",
-          bottom: 0,
-          left: 0,
-          right: 0,
           height: FOOTER_HEIGHT,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
           backgroundColor: config.footer.backgroundColor,
           borderTop: `${config.footer.borderWidth}px solid ${config.footer.borderColor}`,
         }}
       >
         {!gameOver && (
           <button
+            className="retry-button"
             onClick={handleRetry}
             style={{
-              backgroundColor: config.button.backgroundColor,
+              "--button-gradient-start": config.button.gradientStart,
+              "--button-gradient-end": config.button.gradientEnd,
+              "--button-border-color": config.button.borderColor,
               color: config.button.textColor,
               borderRadius: config.button.borderRadius,
-              border: "none",
-              padding: "12px 40px",
-              fontSize: 18,
-              fontWeight: "bold",
-              cursor: "pointer",
             }}
           >
             {config.button.retryLabel}
@@ -227,20 +298,28 @@ export default function App() {
             background: "rgba(0,0,0,0.55)",
           }}
         >
-          <div style={{ color: "#fff", fontSize: 28, marginBottom: 20, fontFamily: config.points.font }}>
+          <div
+            style={{
+              color: "#fff",
+              fontSize: 28,
+              marginBottom: 20,
+              fontFamily: config.points.font,
+            }}
+          >
             {config.gameOverText}
           </div>
           <button
-            onClick={(e) => { e.stopPropagation(); handleRetry(); }}
+            className="retry-button"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleRetry();
+            }}
             style={{
-              backgroundColor: config.button.backgroundColor,
+              "--button-gradient-start": config.button.gradientStart,
+              "--button-gradient-end": config.button.gradientEnd,
+              "--button-border-color": config.button.borderColor,
               color: config.button.textColor,
               borderRadius: config.button.borderRadius,
-              border: "none",
-              padding: "12px 40px",
-              fontSize: 18,
-              fontWeight: "bold",
-              cursor: "pointer",
             }}
           >
             {config.button.retryLabel}

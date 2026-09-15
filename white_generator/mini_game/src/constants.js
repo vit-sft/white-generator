@@ -1,4 +1,2 @@
-export const BASE_BLOCK_HEIGHT = 100;
-export const START_WIDTH = 100;
-export const MIN_WIDTH = 20;
-export const NARROW_STEP = 6;
+export const MIN_WIDTH_RATIO = 0.17;
+export const NARROW_STEP_RATIO = 0.05;
