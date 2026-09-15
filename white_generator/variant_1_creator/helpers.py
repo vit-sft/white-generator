@@ -1,12 +1,16 @@
-import os
-from urllib.parse import urlparse
-import aiofiles
-from aiohttp import ClientSession
-from white_generator.core.config import config
-from white_generator.variant_1_creator.styles import generate_slot_reels, spin_wheel_colors
 import asyncio
 import hashlib
+import os
 import random
+from urllib.parse import urlparse
+
+import aiofiles
+from aiohttp import ClientSession
+
+from white_generator.variant_1_creator.styles import (
+    generate_slot_reels,
+    spin_wheel_colors,
+)
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 TEMPLATES_DIR = os.path.join(BASE_DIR, "templates")
@@ -53,14 +57,19 @@ async def write_bytes_file(path: str, content: bytes) -> str:
         return f.name
 
 
-async def load_files(template_dir: str, fidget_dir: str) -> tuple[str, str, str, str, str]:
+async def load_files(cookie_dir: str, template_dir: str, fidget_dir: str) -> tuple[str, str, str, str, str]:
     """
     Function for readings files in async from random template's folder
+    
+    Args:
+        cookie_dir: Path to cookie directory
+        template_dir: Path to template directory
+        fidget_dir: Path to fidget directory
     """
     index_path = os.path.join(template_dir, "index.html")
     css_path = os.path.join(template_dir, "style.css")
     js_path = os.path.join(template_dir, "main.js")
-    cookie_css_src = os.path.join(config.COOKIE_DIR, "cookie.css")
+    cookie_css_src = os.path.join(cookie_dir, "cookie.css")
     fidget_css_src = os.path.join(fidget_dir, "fidget.css")
     
     index_content, css_content, js_content, cookie_css, fidget_css = await asyncio.gather(
@@ -74,9 +83,15 @@ async def load_files(template_dir: str, fidget_dir: str) -> tuple[str, str, str,
     return index_content, css_content, js_content, cookie_css, fidget_css
 
 
-async def download_image(session: ClientSession, url: str, filename=None) -> str:
+async def download_image(img_dir: str, session: ClientSession, url: str, filename=None) -> str:
     """
     Downloads an image from url into IMG_DIR and hashes its name.
+    
+    Args:
+        img_dir: Path to image directory
+        session: aiohttp ClientSession
+        url: URL to download
+        filename: Optional filename override
     """
     if not url:
         return ""
@@ -92,8 +107,8 @@ async def download_image(session: ClientSession, url: str, filename=None) -> str
     else:
         filename = filename + ext
 
-    os.makedirs(config.IMG_DIR, exist_ok=True)
-    dst = os.path.join(config.IMG_DIR, filename)
+    os.makedirs(img_dir, exist_ok=True)
+    dst = os.path.join(img_dir, filename)
     try:
         async with session.get(url) as resp:
             if resp.status == 200 and "image" in resp.headers.get("Content-Type", ""):
@@ -117,10 +132,13 @@ def choose_random_template() -> str:
     return template_dir
 
 
-def choose_random_fidget_with_params():
+def choose_random_fidget_with_params(fidgets_dir: str):
     """
     Select a random fidget folder and generate the corresponding parameters.
 
+    Args:
+        fidgets_dir: Path to fidgets directory
+    
     Returns:
         fidget_dir (str): Path to the chosen fidget folder.
         params (dict): Dictionary of parameters required for the fidget.
@@ -128,8 +146,8 @@ def choose_random_fidget_with_params():
                        - Spin wheel: {'wheel_colors': list}
     """
     
-    chosen_fidget = random.choice(os.listdir(config.FIDGETS_DIR))
-    fidget_dir = os.path.join(config.FIDGETS_DIR, chosen_fidget)
+    chosen_fidget = random.choice(os.listdir(fidgets_dir))
+    fidget_dir = os.path.join(fidgets_dir, chosen_fidget)
     
     # Determine parameters based on fidget type
     params = {}

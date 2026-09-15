@@ -1,9 +1,9 @@
-from aiobotocore.session import get_session
-import aiofiles
-import os
 import asyncio
 import mimetypes
-from white_generator.utils import build_directories
+import os
+
+import aiofiles
+from aiobotocore.session import get_session
 
 mimetypes.add_type("image/webp", ".webp")
 mimetypes.add_type("font/ttf", ".ttf")
@@ -155,7 +155,6 @@ class AsyncS3Client:
         if not objects_to_install:
             return
 
-        build_directories()
         # Define the key prefix and cloud base URL
         key_prefix = f"{self.basic_folder}{prefix}".rstrip("/")
         base_url = f"https://{self.bucket_name}.s3.{self.region_name}.amazonaws.com/{key_prefix}/source_target.html"

@@ -1,42 +1,29 @@
 import os
 import pathlib
-import string
-import random
 
-ALLOWED_CHARACTERS = string.ascii_letters + string.digits
+from white_generator.core.settings import generate_random_id
 
-def generate_random_id(length):
-    return ''.join(random.choices(ALLOWED_CHARACTERS, k=length))
 
-class AppConfig:
-    def __init__(self):
-        self.APP_DIR = pathlib.Path(__file__).parent.parent
-        self.COOKIE_DIR = pathlib.Path(self.APP_DIR / "cookie")
-        self.VAR1_DIR = pathlib.Path(self.APP_DIR / "variant_1_creator")
-        self.FIDGETS_DIR = pathlib.Path(self.VAR1_DIR / "presets/fidgets")
-        
-        self.DIST_DIR = None
-        self.STATIC_DIR = None
-        self.IMG_DIR = None
-        self.CSS_DIR = None
-        self.JS_DIR = None
-        self.FONTS_DIR = None
-
-        # Static settings
-        self.LLM_TEXT_MODEL = "gemini-2.5-flash-lite"
-        self.LLM_IMAGE_MODEL = "gemini-2.5-flash-image"
-        self.BUCKET_NAME = "mtoffer-club"
-        self.AWS_REGION = "eu-north-1"
-        self.BASIC_FOLDER = "public/cached-whites/"
-
-    def set_dist_dir(self, path: str):
-        """Set the base build directory and dependent paths."""
-        self.DIST_DIR = os.path.abspath(path)
-        self.STATIC_DIR = os.path.join(self.DIST_DIR, os.path.join("source_target_files", generate_random_id(8)))
+class BuildContext:
+    """Base class for build-specific dynamic paths."""
+    def __init__(self, dist_dir: str):
+        self.DIST_DIR = os.path.abspath(dist_dir)
+        self.STATIC_DIR = os.path.join(self.DIST_DIR, "source_target_files", generate_random_id(8))
         self.IMG_DIR = os.path.join(self.STATIC_DIR, "img")
+
+class Variant1BuildContext(BuildContext):
+    def __init__(self, dist_dir: str):
+        super().__init__(dist_dir)
+        self.APP_DIR = pathlib.Path(__file__).parent.parent
+        self.COOKIE_DIR = self.APP_DIR / "cookie"
+        self.VAR1_DIR = self.APP_DIR / "variant_1_creator"
+        self.FIDGETS_DIR = self.VAR1_DIR / "presets/fidgets"
         self.CSS_DIR = os.path.join(self.STATIC_DIR, "css")
         self.JS_DIR = os.path.join(self.STATIC_DIR, "js")
         self.FONTS_DIR = os.path.join(self.STATIC_DIR, "fonts")
 
-
-config = AppConfig()
+class Variant2BuildContext(BuildContext):
+    def __init__(self, dist_dir: str):
+        super().__init__(dist_dir)
+        # Variant 2 might have different sub-paths
+        self.ASSETS_DIR = os.path.join(self.STATIC_DIR, "assets")

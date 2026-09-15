@@ -1,16 +1,18 @@
 import asyncio
-import shutil
 import os
-from white_generator.core.config import config
+import shutil
 import time
 from functools import wraps
 
+from white_generator.core.config import BuildContext
 
-async def copy_file_async(src, dst):
+
+async def copy_file_async(src: str, dst: str) -> None:
+    """Copy a file asynchronously."""
     await asyncio.to_thread(shutil.copy2, src, dst)
 
 
-async def copy_all_files(file_dir, dest_dir):
+async def copy_all_files(file_dir: str, dest_dir: str) -> None:
     os.makedirs(dest_dir, exist_ok=True)
 
     tasks = []
@@ -24,28 +26,33 @@ async def copy_all_files(file_dir, dest_dir):
     await asyncio.gather(*tasks)
 
 
-def remove_dir(path):
+def remove_dir(path: str) -> None:
     """Removes directory if it exists"""
     if os.path.isdir(path):
         shutil.rmtree(path)
 
-
-def build_directories():
+def build_directories(context: BuildContext) -> None:
     """
     Removes old dir and creates new folders for site
+
+    Args:
+        context: BuildContext instance with DIST_DIR and other paths set
     """
-    remove_dir(config.DIST_DIR)
+    remove_dir(context.DIST_DIR)
     dirs_to_create = [
-        config.DIST_DIR,
-        config.STATIC_DIR,
-        config.IMG_DIR,
-        config.CSS_DIR,
-        config.JS_DIR,
-        config.FONTS_DIR,
+        context.DIST_DIR,
+        context.STATIC_DIR,
+        context.IMG_DIR,
     ]
+    # Add other paths if they exist in the specific context
+    if hasattr(context, 'CSS_DIR'): dirs_to_create.append(context.CSS_DIR)
+    if hasattr(context, 'JS_DIR'): dirs_to_create.append(context.JS_DIR)
+    if hasattr(context, 'FONTS_DIR'): dirs_to_create.append(context.FONTS_DIR)
+    if hasattr(context, 'ASSETS_DIR'): dirs_to_create.append(context.ASSETS_DIR)
 
     for directory in dirs_to_create:
         os.makedirs(directory, exist_ok=True)
+
 
 
 def timeit(func):

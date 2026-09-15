@@ -1,39 +1,41 @@
-import os
 import asyncio
-import hashlib
 import base64
+import hashlib
+import os
 import random
-from bs4 import BeautifulSoup
+
 from aiohttp import ClientSession
-from white_generator.core.config import config
-from white_generator.utils import copy_all_files, build_directories, copy_file_async
-from white_generator.variant_1_creator.styles import get_random_style, get_font_face
-from white_generator.variant_1_creator.helpers import (
-    identify_store,
-    write_file,
-    write_bytes_file,
-    read_file,
-    load_files,
-    download_image,
-    choose_random_template,
-    choose_random_fidget_with_params,
-    PRESETS_IMG_DIR,
-    TEMPLATES_DIR,
-)
+from bs4 import BeautifulSoup
+
+from white_generator.core.config import Variant1BuildContext
+from white_generator.utils import build_directories, copy_all_files, copy_file_async
 from white_generator.variant_1_creator.adresses import get_random_adress
 from white_generator.variant_1_creator.footer import (
-    get_use_principles,
-    get_terms,
     get_faq,
+    get_terms,
+    get_use_principles,
 )
-from white_generator.variant_1_creator.schemas import (
-    AppData,
-    AppUrlData,
-    AppGeneratedData,
+from white_generator.variant_1_creator.generator import AppDataGenerator
+from white_generator.variant_1_creator.helpers import (
+    PRESETS_IMG_DIR,
+    TEMPLATES_DIR,
+    choose_random_fidget_with_params,
+    choose_random_template,
+    download_image,
+    identify_store,
+    load_files,
+    read_file,
+    write_bytes_file,
+    write_file,
 )
 from white_generator.variant_1_creator.parser import get_parser
 from white_generator.variant_1_creator.requests import fetch_html
-from white_generator.variant_1_creator.generator import AppDataGenerator
+from white_generator.variant_1_creator.schemas import (
+    AppData,
+    AppGeneratedData,
+    AppUrlData,
+)
+from white_generator.variant_1_creator.styles import get_font_face, get_random_style
 
 
 class AppBuilder:
@@ -43,12 +45,14 @@ class AppBuilder:
     All methods return abs path to a destination directory.
     """
 
-    def __init__(self, template_number: int = None) -> None:
+    def __init__(self, context: Variant1BuildContext, template_number: int | None = None) -> None:
         """Initialisation for builder. Has chosen template in it.
 
         Args:
-            template_number (int): Chosen template number. Default is a random one.
+            context: Variant1BuildContext instance for this build.
+            template_number: Chosen template number. Default is a random one.
         """
+        self.context = context
         self._template_dir = (
             os.path.join(TEMPLATES_DIR, str(template_number))
             if template_number
@@ -60,7 +64,7 @@ class AppBuilder:
         Builds a site from a parser data into a DIST_DIR folder
         """
 
-        build_directories()
+        build_directories(self.context)
 
         # Download images
         headers = {
@@ -69,9 +73,9 @@ class AppBuilder:
 
         async with ClientSession(headers=headers) as session:
             screenshot_tasks = [
-                download_image(session, url) for url in data.screenshot_urls
+                download_image(self.context.IMG_DIR, session, url) for url in data.screenshot_urls
             ]
-            icon_task = download_image(session, data.icon_url, filename="icon")
+            icon_task = download_image(self.context.IMG_DIR, session, data.icon_url, filename="icon")
             results = await asyncio.gather(*screenshot_tasks, icon_task)
 
         screenshot_files = results[:-1]
@@ -85,20 +89,20 @@ class AppBuilder:
         """
         Builds a site from pre-existing application data into the DIST_DIR folder.
         """
-        build_directories()
+        build_directories(self.context)
 
         # Prepare async tasks for screenshots
         screenshot_tasks = []
         for screenshot_data in data.screenshots_data:
             filename = hashlib.md5(screenshot_data).hexdigest() + ".webp"
-            dst = os.path.join(config.IMG_DIR, filename)
+            dst = os.path.join(self.context.IMG_DIR, filename)
             screenshot_tasks.append(
                 write_bytes_file(dst, base64.b64decode(screenshot_data))
             )
 
         # Prepare icon task
         icon_data = base64.b64decode(data.icon_data)
-        icon_dst = os.path.join(config.IMG_DIR, "icon.webp")
+        icon_dst = os.path.join(self.context.IMG_DIR, "icon.webp")
         icon_task = write_bytes_file(icon_dst, icon_data)
 
         # Await all image writes
@@ -116,7 +120,7 @@ class AppBuilder:
         into the DIST_DIR folder.
         """
 
-        build_directories()
+        build_directories(self.context)
 
         # Download screenshots
         headers = {
@@ -127,26 +131,15 @@ class AppBuilder:
             ),
         }
 
-        # async with ClientSession(headers=headers) as session:
-        #     screenshot_tasks = [
-        #         download_image(session, url) for url in data.screenshot_urls
-        #     ]
-        #     screenshot_results = await asyncio.gather(*screenshot_tasks)
-
-        # # Filter out failed downloads
-        # screenshot_files = [path for path in screenshot_results if path]
         async with ClientSession(headers=headers) as session:
-            icon_task = download_image(session, data.icon_url, filename='icon')
+            icon_task = download_image(self.context.IMG_DIR, session, data.icon_url, filename='icon')
             screenshot_tasks = [
-                download_image(session, url) for url in data.screenshot_urls
+                download_image(self.context.IMG_DIR, session, url) for url in data.screenshot_urls
             ]
             images_results = await asyncio.gather(icon_task, *screenshot_tasks)
 
         # Filter out failed downloads
         images_files = [path for path in images_results if path]
-        # # Save icon bytes
-        # icon_dst = os.path.join(config.IMG_DIR, "icon.webp")
-        # icon_path = await write_bytes_file(icon_dst, data.icon_data)
 
         return await self._build_site(
             data.title, data.description, images_files[0], images_files[1:], data.app_url
@@ -170,11 +163,11 @@ class AppBuilder:
             icon_path = screenshot_files[0]
 
         # Choosing fidget and getting parameters for it
-        fidget_path, params = choose_random_fidget_with_params()
+        fidget_path, params = choose_random_fidget_with_params(str(self.context.FIDGETS_DIR))
         
         # Load template files
         index_content, css_content, js_content, cookie_css_content, fidget_css_content = await load_files(
-            self._template_dir, fidget_path
+            str(self.context.COOKIE_DIR), self._template_dir, fidget_path
         )
 
         # Build screenshots HTML
@@ -188,7 +181,7 @@ class AppBuilder:
         component_files = os.listdir(components_path)
         random.shuffle(component_files)
         # Cookie html
-        cookie_html_src = os.path.join(config.COOKIE_DIR, "cookie.html")
+        cookie_html_src = os.path.join(self.context.COOKIE_DIR, "cookie.html")
 
         # Fidget html
         fidget_html_src = os.path.join(fidget_path, "fidget.html")
@@ -227,7 +220,7 @@ class AppBuilder:
         principles_html = get_use_principles()
         terms_html = get_terms()
         faq_html = get_faq()
-        white_base_id = os.path.basename(config.STATIC_DIR)
+        white_base_id = os.path.basename(self.context.STATIC_DIR)
         # Build context dictionary
         context = {
             "title": title,
@@ -262,25 +255,25 @@ class AppBuilder:
             [root_element, font_face, css_content, cookie_css_content, fidget_css_content]
         )
 
-        cookie_js_src = os.path.join(config.COOKIE_DIR, "cookie.js")
+        cookie_js_src = os.path.join(self.context.COOKIE_DIR, "cookie.js")
         fidget_js_src = os.path.join(fidget_path, "fidget.js")
 
-        index_path = os.path.join(config.DIST_DIR, "source_target.html")
-        css_path = os.path.join(config.CSS_DIR, "main_style.css")
-        js_path = os.path.join(config.JS_DIR, "main.js")
-        fonts_path = os.path.join(config.FONTS_DIR, chosen_font)
+        index_path = os.path.join(self.context.DIST_DIR, "source_target.html")
+        css_path = os.path.join(self.context.CSS_DIR, "main_style.css")
+        js_path = os.path.join(self.context.JS_DIR, "main.js")
+        fonts_path = os.path.join(self.context.FONTS_DIR, chosen_font)
 
         await asyncio.gather(
             write_file(index_path, index_content),
             write_file(css_path, css_content),
             write_file(js_path, js_content),
-            copy_file_async(cookie_js_src, config.JS_DIR),
-            copy_file_async(fidget_js_src, config.JS_DIR),
+            copy_file_async(cookie_js_src, self.context.JS_DIR),
+            copy_file_async(fidget_js_src, self.context.JS_DIR),
             copy_all_files(font_dir, fonts_path),
-            copy_all_files(PRESETS_IMG_DIR, config.IMG_DIR),
+            copy_all_files(PRESETS_IMG_DIR, self.context.IMG_DIR),
         )
 
-        return os.path.abspath(config.DIST_DIR)
+        return os.path.abspath(self.context.DIST_DIR)
 
     async def build_from_app_data(self, app_data: dict) -> str:
         """
