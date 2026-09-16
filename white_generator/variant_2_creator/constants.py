@@ -1,13 +1,7 @@
-"""
-Constants module for variant_2_creator mini app builder.
-"""
-
 import json
 import random
 
-# ---------------------------------------------------------------------------
 # Randomization pools
-# ---------------------------------------------------------------------------
 
 FALLBACK_COLORS = [
     "linear-gradient(180deg, #6ec6ff 0%, #cdeffd 60%, #eaf7ff 100%)",
@@ -125,20 +119,11 @@ GAME_OVER_TEXTS = [
 ]
 
 
-# ---------------------------------------------------------------------------
 # Config generator
-# ---------------------------------------------------------------------------
 
 def get_random_game_config():
     """
     Return a randomized game configuration.
-
-    Dynamic fields intentionally omitted:
-        - background.image
-        - block.textures
-        - points.currencyIcon
-
-    The block shadow is enabled with a 70% probability.
     """
 
     footer = random.choice(FOOTER_COLOR_SETS)
