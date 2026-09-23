@@ -39,6 +39,8 @@
     },
     "button": {
         "retryLabel": "Retry",
+        "startLabel": "Start",
+        "resumeLabel": "Resume",
         "gradientStart": "#ff8a00",
         "gradientEnd": "#ff3d00",
         "borderColor": "#ffd166",
@@ -49,5 +51,25 @@
     "game": {
         "topMargin": 40,
         "moveSpeed": 2.2
+    },
+    "legal": {
+        "gameTitle": "Tower",
+        "termsAndPolicies": {
+            "privacyText": "We respect your privacy. Any personal information you provide is handled in accordance with data protection laws. We do not share your data with third parties without your consent. For more details, see our",
+            "privacyPolicyLinkText": "Privacy Policy",
+            "privacyPolicyUrl": "/privacy-policy",
+            "contactText": "Contact us at support@example.com",
+            "responsibleUseText": "Our app is designed to provide an enjoyable and positive experience for all users. To maintain a safe and respectful environment, please follow these responsible use principles: play in moderation and take regular breaks.",
+            "termsText": "Welcome to Tower! By playing, you agree to follow these simple terms: this game is for entertainment purposes only."
+        },
+        "rules": {
+            "text": "Tap the screen to stop the moving block and place it on the tower. Each new block is slightly narrower than the last. Keep stacking to increase your score. The game ends when a block misses the tower. Press Retry to start a new game."
+        },
+        "cookies": {
+            "text": "This app uses cookies to remember your best score and preferences.",
+            "acceptAllLabel": "Accept All",
+            "acceptNecessaryLabel": "Necessary Only",
+            "backgroundColor": "#1e293b"
+        }
     }
 }

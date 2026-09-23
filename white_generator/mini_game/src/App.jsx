@@ -4,6 +4,10 @@ import CurrencyIcon from "./components/CurrencyIcon";
 import Sky from "./components/Sky";
 import { loadConfig } from "./config/loadConfig";
 import { MIN_WIDTH_RATIO, NARROW_STEP_RATIO } from "./constants";
+import LegalModal from "./components/LegalModal";
+import StartScreen from "./components/StartScreen";
+import CookieModal from "./components/CookieModal";
+import MenuIcon from "./components/MenuIcon";
 
 function getBlockSize() {
   const w = window.innerWidth;
@@ -24,6 +28,7 @@ export default function App() {
   const [gameOver, setGameOver] = useState(false);
   const [sizes, setSizes] = useState(getBlockSize);
   const [gameWidth, setGameWidth] = useState(window.innerWidth);
+  const [gamePhase, setGamePhase] = useState("start");
   const rafRef = useRef(null);
   const dirRef = useRef(1);
   const lastTextureRef = useRef(null);
@@ -45,10 +50,24 @@ export default function App() {
   useEffect(() => {
     loadConfig().then((cfg) => {
       setConfig(cfg);
-      startGame(cfg, []);
     });
     return () => cancelAnimationFrame(rafRef.current);
   }, []);
+
+  function handleStart() {
+    setGamePhase("playing");
+    startGame(config, []);
+  }
+
+  function handlePause() {
+    cancelAnimationFrame(rafRef.current);
+    setGamePhase("paused");
+  }
+
+  function handleResume() {
+    setGamePhase("playing");
+    animate(config);
+  }
 
   if (!config) return null;
 
@@ -112,6 +131,7 @@ export default function App() {
   }
 
   function handleTap() {
+    if (gameOver || !current || gamePhase !== "playing") return;
     if (gameOver || !current) return;
 
     const lastBlock = stack[stack.length - 1];
@@ -164,6 +184,7 @@ export default function App() {
     setStack([]);
     setScore(0);
     setGameOver(false);
+    setGamePhase("playing");
     startGame(config, []);
   }
 
@@ -201,9 +222,15 @@ export default function App() {
           color: config.points.color,
         }}
       >
-        <div style={{ fontSize: config.points.fontSize * 0.6 }}>
-          {config.points.bestLabel}: {bestScore}
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          {gamePhase === "playing" && !gameOver && (
+            <MenuIcon onClick={handlePause} />
+          )}
+          <div style={{ fontSize: config.points.fontSize * 0.6 }}>
+            {config.points.bestLabel}: {bestScore}
+          </div>
         </div>
+
         <div
           style={{
             display: "flex",
@@ -325,6 +352,31 @@ export default function App() {
             {config.button.retryLabel}
           </button>
         </div>
+      )}
+      <CookieModal
+        cookies={config.legal.cookies}
+        font={config.points.font}
+        buttonConfig={config.button}
+      />
+
+      {gamePhase === "start" && (
+        <StartScreen
+          legal={config.legal}
+          font={config.points.font}
+          onStart={handleStart}
+          buttonConfig={config.button}
+        />
+      )}
+
+      {gamePhase === "paused" && (
+        <LegalModal
+          legal={config.legal}
+          font={config.points.font}
+          onClose={handleResume}
+          showResume={true}
+          onResume={handleResume}
+          buttonConfig={config.button}
+        />
       )}
     </div>
   );
