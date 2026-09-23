@@ -1,11 +1,16 @@
-from white_generator.core.config import config
-from urllib.parse import urlencode
-from google import genai
-from google.genai import types
-from google.api_core import exceptions as google_exceptions
-from aiohttp import ClientSession, client_exceptions, ClientError
-import random
 import asyncio
+import random
+from urllib.parse import urlencode
+
+from aiohttp import ClientError, ClientSession, client_exceptions
+from google import genai
+from google.api_core import exceptions as google_exceptions
+from google.genai import types
+
+# Create a base config instance for static settings
+from white_generator.core import settings
+
+# Import static config values
 from white_generator.variant_1_creator.schemas import AppGeneratedData
 
 
@@ -118,7 +123,7 @@ class AppDataGenerator:
         Returns:
             str: An HTML-formatted app description.
         """
-        model = config.LLM_TEXT_MODEL
+        model = settings.LLM_TEXT_MODEL
         promt = f"Write a short, engaging app store description for an app called '{app_name}'."
         contents = [
             types.Content(
@@ -217,7 +222,7 @@ class AppDataGenerator:
             bytes: The generated image bytes.
         """
         
-        model = config.LLM_IMAGE_MODEL
+        model = settings.LLM_IMAGE_MODEL
         contents = [
             types.Content(
                 role="user",

@@ -3,7 +3,6 @@ export default function CurrencyIcon({ icon, size = 20 }) {
     typeof icon === "string" &&
     (icon.startsWith("http") || icon.startsWith("/") || icon.startsWith("./"));
 
-  if (isImageUrl) {
     return (
       <img
         src={icon}
@@ -11,8 +10,4 @@ export default function CurrencyIcon({ icon, size = 20 }) {
         style={{ width: size, height: size, verticalAlign: "middle" }}
       />
     );
-  }
-  return (
-    <span style={{ fontSize: size, verticalAlign: "middle" }}>{icon}</span>
-  );
 }
