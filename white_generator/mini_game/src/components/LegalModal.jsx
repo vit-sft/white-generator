@@ -50,8 +50,28 @@ export default function LegalModal({
         <div className="legal-body">
           {tab === "terms" ? (
             <>
-              <h3>Privacy</h3>
-              <p className="content">{legal.termsAndPolicies.privacyText}</p>
+            <h3>Privacy</h3>
+            <p className="content">
+              {legal.termsAndPolicies.privacyText}
+              {legal.termsAndPolicies.privacyPolicyLinkText && (
+                <>
+                  {" "}
+                  <a
+                    href={legal.termsAndPolicies.privacyPolicyUrl || "#"}
+                    target={legal.termsAndPolicies.privacyPolicyUrl ? "_blank" : "_self"}
+                    rel="noopener noreferrer"
+                    className="legal-link"
+                    onClick={(e) => {
+                      if (!legal.termsAndPolicies.privacyPolicyUrl) {
+                        e.preventDefault();
+                      }
+                    }}
+                  >
+                    {legal.termsAndPolicies.privacyPolicyLinkText}
+                  </a>
+                </>
+              )}
+            </p>
               <h3>Contact</h3>
               <p className="content">{legal.termsAndPolicies.contactText}</p>
               <h3>Responsible Use</h3>
